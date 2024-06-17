@@ -1,0 +1,17 @@
+Package: NRP.web
+Type: Package
+Title: What the Package Does
+Version: 0.1.0
+Author: Konrad Mikalauskas
+Maintainer: Konrad Mikalauskas <k.mikalauskas@uva.nl>
+Description: A brief description
+Imports:
+  shiny,
+  DT,
+  tidyverse,
+  qgraph,
+  bslib
+License: What license it uses
+RoxygenNote: 7.2.3
+Encoding: UTF-8
+
