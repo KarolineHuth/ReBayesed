@@ -63,7 +63,7 @@ ui <- navbarPage(
                  condition = "TRUE",
                  checkboxGroupInput("clinicalCheckbox",
                                     "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("Population",
+                                    choices = c("General Population" = "Population",
                                                 "Clinical",
                                                 "Mixed"),
                                     selected = "Population"
@@ -106,7 +106,7 @@ ui <- navbarPage(
                  condition = "TRUE",
                  checkboxGroupInput("clinicalCheckboxMetadata",
                                     "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("Population",
+                                    choices = c("General Population" = "Population",
                                                 "Clinical",
                                                 "Mixed"),
                                     selected = "Population"
@@ -206,7 +206,7 @@ ui <- navbarPage(
                  condition = "TRUE",
                  checkboxGroupInput("clinicalCheckboxEstimates",
                                     "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("Population",
+                                    choices = c("General Population" = "Population",
                                                 "Clinical",
                                                 "Mixed"),
                                     selected = "Population"
