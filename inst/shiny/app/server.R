@@ -10,11 +10,11 @@ library(readxl)
 server <- function(input, output, session) {
 
   # Load data
-  agg_data_list <- readRDS(system.file("extdata/AggStudyResults.RData",
+  agg_data_list <- readRDS(system.file("extdata/AggStudyResults.rds",
                                        package = "NRP.web"))
-  agg_data_level <- readRDS(system.file("extdata/StudyLevelofInclusion.RData",
+  agg_data_level <- readRDS(system.file("extdata/StudyLevelofInclusion.rds",
                                         package = "NRP.web"))
-  agg_data_point <- readRDS(system.file("extdata/EdgeSpecificEstimates.RData",
+  agg_data_point <- readRDS(system.file("extdata/EdgeSpecificEstimates.rds",
                                         package = "NRP.web"))
   metadata <- read_excel(system.file("extdata/metadata.xlsx",
                                      package = "NRP.web"))
