@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyjs)
 library(DT)
 library(bslib)
 library(sortable)
@@ -26,15 +27,26 @@ rank_list_swap <- rank_list(
 ui <- navbarPage(
   theme = bslib::bs_theme(bootswatch = "yeti"),
   "App Title",
-  tabPanel("About",
-           fluidPage(
-             h3("About"),
-             p("Cool logo"),
-             p("Short explainer text"),
-             p("Citation"),
-             p("Disclaimer about app still being in development"),
-             p("Contact button")
-           )
+  tabPanel(
+    "About",
+    fluidPage(
+      useShinyjs(),  # Initialize shinyjs
+      titlePanel("About This App"),
+      h2("Welcome to the About Page"),
+      p("This Shiny app is designed to provide a simple demonstration of how to create an About page with some text and a contact button."),
+      p("Feel free to explore the features of this app and contact us if you have any questions or feedback."),
+      p("For more information on this topic, visit the ",
+        a("Bayesian Graphical Modeling website", href = "https://bayesiangraphicalmodeling.com/re-analysis/", target = "_blank"),
+        "."
+      ),
+      div(style = "border: 1px solid grey; background-color: #f0f0f0; padding: 10px; margin-top: 10px;",
+          "Huth, K., Pihlajamäki, M., Marsman, M., & Haslbeck, J. M. B. (2024, June 13). Bayesian Re-Analysis. Retrieved from osf.io/n8r9g",
+          br(),
+          actionButton("copyCitation", "Copy Citation", icon = icon("copy"))
+      ),
+      br(),
+      actionButton("contactBtn", "Contact", icon = icon("envelope"))
+    )
   ),
   tabPanel("Individual Studies",
            sidebarLayout(
