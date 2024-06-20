@@ -35,6 +35,7 @@ server <- function(input, output, session) {
   # Render indStudiesTable
   output$indStudiesTable <- renderDT({
     datatable(table_data(),
+              colnames = c("Network ID", "Authors", "Year", "DOI", "Nodes", "Edges", "Sample Size", "Model", "Topic", "Sample Type", "Subtopic"),
               selection = 'single',
               escape = c(-4), # Allows HTML in cells (makes hyperlinks clickable)
               filter = 'top',
