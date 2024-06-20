@@ -170,7 +170,6 @@ server <- function(input, output, session) {
     dplyr::filter(SampleType %in% input$clinicalCheckboxEstimates) %>%
     dplyr::filter(Year >= input$yearSliderEstimates[1] & Year <= input$yearSliderEstimates[2]) %>%
     dplyr::filter(Nodes >= input$nNodesSliderEstimates[1] & Nodes <= input$nNodesSliderEstimates[2]) %>%
-    dplyr::filter(Edges >= input$nEdgesSliderEstimates[1] & Edges <= input$nEdgesSliderEstimates[2]) %>%
     dplyr::filter(Sample.size >= input$sampleSizeEstimates[1] & Sample.size <= input$sampleSizeEstimates[2]) %>%
     rownames_to_column() %>%
     rename("Network_ID" = "rowname") %>%

@@ -133,13 +133,6 @@ ui <- navbarPage(
                            value = c(3, 97),
                            step = 1
                ),
-               sliderInput("nEdgesSliderMetadata",
-                           "Number of Edges",
-                           min = 3,
-                           max = 4656,
-                           value = c(3, 4656),
-                           step = 1
-               ),
                sliderInput("sampleSizeMetadata",
                            "Sample Size",
                            min = 23,
@@ -231,13 +224,6 @@ ui <- navbarPage(
                            min = 3,
                            max = 97,
                            value = c(3, 97),
-                           step = 1
-               ),
-               sliderInput("nEdgesSliderEstimates",
-                           "Number of Edges",
-                           min = 3,
-                           max = 4656,
-                           value = c(3, 4656),
                            step = 1
                ),
                sliderInput("sampleSizeEstimates",
