@@ -28,6 +28,13 @@ ui <- navbarPage(
   "App Title",
   tabPanel("About",
            fluidPage(
+             # tags$head(
+             #   tags$script(HTML(
+             #     "Shiny.addCustomMessageHandler('openInBrowser', function(message) {
+             #      window.open(message.url, '_blank');
+             #    });"
+             #   ))
+             # ),
              h3("About"),
              p("Cool logo"),
              p("Short explainer text"),

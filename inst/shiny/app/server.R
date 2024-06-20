@@ -34,8 +34,32 @@ server <- function(input, output, session) {
   ### INDIVIDUAL STUDIES START ###
   # Render indStudiesTable
   output$indStudiesTable <- renderDT({
-    datatable(table_data(), filter = 'top', options = list(pageLength = 25), selection = 'single')
-  }, server = TRUE)
+    datatable(table_data(),
+              selection = 'single',
+              escape = c(-4), # Allows HTML in cells (makes hyperlinks clickable)
+              filter = 'top',
+              options = list(
+                pageLength = 50,
+                columnDefs = list(
+                  list(
+                    targets = 4,
+                    render = JS(
+                      "function(data, type, row, meta) {",
+                      "return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
+                      # "return '<a href=\"#\" onclick=\"Shiny.setInputValue(\\'doi_click\\', {url: \\'https://doi.org/' + data + '\\'}, {priority: \\'event\\'}); return false;\">' + data + '</a>';",
+                      "}"
+                      )
+                    )
+                  )
+                )
+              )
+    }, server = TRUE
+    )
+
+  # # Open DOI in browser
+  # observeEvent(input$doi_click, {
+  #   session$sendCustomMessage('openInBrowser', input$doi_click)
+  # })
 
   # Render par_plot and edge_ plots
   observeEvent(input$indStudiesTable_rows_selected, {
