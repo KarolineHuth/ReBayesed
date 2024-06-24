@@ -76,8 +76,8 @@ ui <- navbarPage(
                                     selected = "Population"
                                     )
                ),
-               downloadButton("downloadTable",
-                              "Download Table as RDS")
+               downloadButton("downloadIndStudiesTable",
+                              "Download Filtered Network Results as RDS")
              ),
              mainPanel(
                DTOutput("indStudiesTable"),
