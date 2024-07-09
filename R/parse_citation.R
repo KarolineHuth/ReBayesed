@@ -1,6 +1,6 @@
 #' @title Parse Citation into In-text Reference, Year and DOI
 #'
-#' @decsription This function extracts the in-text reference, year and DOI from a citation.
+#' @description This function extracts the in-text reference, year and DOI from a citation.
 #'
 #' @param citation A character vector containing the citation in APA format.
 #'

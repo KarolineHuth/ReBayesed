@@ -2,24 +2,15 @@ library(shiny)
 library(DT)
 library(bslib)
 library(sortable)
+library(shinyjs)
 
-labels <- list(
-  "one",
-  "two",
-  "three",
-  htmltools::tags$div(
-    htmltools::em("Complex"), " html tag without a name"
-  ),
-  "five" = htmltools::tags$div(
-    htmltools::em("Complex"), " html tag with name: 'five'"
-  )
-)
-
-rank_list_swap <- rank_list(
-  text = "Notice that dragging causes items to swap",
-  labels = labels,
-  input_id = "rank_list_swap",
-  options = sortable_options(swap = TRUE)
+ui <- fluidPage(
+  tags$head(tags$style(HTML("
+    table.dataTable tbody td:nth-child(2) {
+      width: 50px;
+    }
+  "))),
+  # Your other UI components
 )
 
 # Define UI
@@ -28,13 +19,10 @@ ui <- navbarPage(
   "App Title",
   tabPanel("About",
            fluidPage(
-             # tags$head(
-             #   tags$script(HTML(
-             #     "Shiny.addCustomMessageHandler('openInBrowser', function(message) {
-             #      window.open(message.url, '_blank');
-             #    });"
-             #   ))
-             # ),
+             tags$head(
+               tags$style(HTML("table {table-layout: fixed;")),
+               tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"),
+               ),
              h3("About"),
              p("Cool logo"),
              p("Short explainer text"),
@@ -76,6 +64,9 @@ ui <- navbarPage(
                                     selected = "Population"
                                     )
                ),
+               checkboxInput("select_all",
+                             "Select/Deselect All"),
+               br(),
                downloadButton("downloadIndStudiesTable",
                               "Download Filtered Network Results as RDS")
              ),
@@ -181,6 +172,19 @@ ui <- navbarPage(
   tabPanel("Estimates",
            sidebarLayout(
              sidebarPanel(
+               shinyjs::useShinyjs(),
+               checkboxInput("useSelectedNetworks",
+                             "Use Networks Selected in 'Individual Studies' Tab"),
+               checkboxGroupInput(
+                 "estimatesPlotsCheckbox",
+                 "Plots",
+                 choices = c("Frequentist vs. Bayesian Inclusion Probability" = "fvb_incl",
+                             "Edge Estimate vs. Posterior Inclusion Probability" = "edge_est_post_incl",
+                             "Frequentist Estimate vs. Bayesian Estimate" = "fvb_est"),
+                 selected = c("fvb_incl",
+                              "edge_est_post_incl",
+                              "fvb_est")
+               ),
                checkboxGroupInput("topicCheckboxEstimates",
                                   "Topics",
                                   choices = c("Clinical",
@@ -239,12 +243,15 @@ ui <- navbarPage(
              ),
              mainPanel(
                fluidRow(
+                 column(6, plotOutput("netDensityDensity")),
+                 column(6, plotOutput("netEdgeDensity")),
+               ),
+               fluidRow(
                  column(6, plotOutput("freqVsBayesInclBar")),
                  column(6, plotOutput("edgeEstVsPostInclProb"))
                ),
                fluidRow(
                  column(6, plotOutput("freqEstVsBayesEst")),
-                 column(6, plotOutput("netDensity"))
                )
              )
            )

@@ -7,15 +7,18 @@
 #' @return A density plot of the proportion of included edges in all networks.
 #' @export
 
-net_density_plot <- function(agg_point){
+net_density_density_plot <- function(agg_point){
+  # compute network densities
   density_data <- agg_point %>%
     group_by(networkID) %>%
     summarise(n = n(),
               density = sum(BGGM_inc_prob > .5)/n) %>%
     ungroup()
 
-  hdi <- ggdist::median_hdi(density_data$density, na.rm = TRUE, .width = 0.95)
+  # calculate HDI and median
+  hdi <- ggdist::median_hdci(density_data$density, na.rm = TRUE, .width = 0.95)
 
+  # format HDI values (APA7)
   hdi_min_text <- if(hdi$ymin == 0){
     "0"
   } else {
@@ -28,9 +31,10 @@ net_density_plot <- function(agg_point){
     str_sub(round(hdi$ymax, 3), 2)
   }
 
+  # create plot
   plot <- density_data %>%
     ggplot(aes(x=density)) +
-    ggdist::stat_halfeye(.width = 0.95, color = "black", point_interval = median_hdi) +
+    ggdist::stat_halfeye(.width = 0.95, color = "black", point_interval = median_hdci) +
     # geom_vline(xintercept = median_density, linetype="dashed", color="red") +
     # geom_point(aes(x = density, y = -0.05), size = 2, color = "black", shape = 1) +
     geom_jitter(aes(x = density, y = -0.05), width = 0, height = 0.025, color = "black", shape = 1, alpha = 0.5) +
