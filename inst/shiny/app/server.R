@@ -10,6 +10,36 @@ library(magrittr)
 # Define server logic
 server <- function(input, output, session) {
 
+
+  ##### ABOUT PAGE ######
+  # Create contact link
+  observeEvent(input$contactBtn, {
+    showModal(modalDialog(
+      title = "Contact Us",
+      HTML("You can reach us at: <a href='mailto:networkreanalysis-fmg@uva.nl'>networkreanalysis-fmg@uva.nl</a>"),
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  # Custom JavaScript for copying text to clipboard
+  observeEvent(input$copyCitation, {
+    citationText <- "Huth, K., Pihlajamäki, M., Marsman, M., & Haslbeck, J. M. B. (2024, June 13). Bayesian Re-Analysis. Retrieved from osf.io/n8r9g"
+    js$copyToClipboard(citationText)
+    showNotification("Citation copied to clipboard!")
+  })
+
+  shinyjs::extendShinyjs(text = "
+    shinyjs.copyToClipboard = function(params) {
+      var copyText = document.createElement('textarea');
+      copyText.value = params;
+      document.body.appendChild(copyText);
+      copyText.select();
+      document.execCommand('copy');
+      document.body.removeChild(copyText);
+    }
+  ", functions = c("copyToClipboard"))
+
+
   # Load data
   agg_data_list <- readRDS(system.file("extdata/AggStudyResults.rds",
                                        package = "NRP.web"))

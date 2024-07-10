@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyjs)
 library(DT)
 library(bslib)
 library(sortable)
@@ -16,20 +17,48 @@ ui <- fluidPage(
 # Define UI
 ui <- navbarPage(
   theme = bslib::bs_theme(bootswatch = "yeti"),
-  "App Title",
-  tabPanel("About",
-           fluidPage(
-             tags$head(
-               tags$style(HTML("table {table-layout: fixed;")),
-               tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"),
-               ),
-             h3("About"),
-             p("Cool logo"),
-             p("Short explainer text"),
-             p("Citation"),
-             p("Disclaimer about app still being in development"),
-             p("Contact button")
-           )
+  "RobustNetPsych",
+  tabPanel(
+    "About",
+    fluidPage(
+      tags$head(
+        tags$style(HTML("table {table-layout: fixed;")),
+        tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"),
+      ),
+      useShinyjs(),  # Initialize shinyjs
+      titlePanel("RobustNetPsych: Bayesian Insights into Network Stability and Evidence"),
+      br(),  # Add a line break to create space
+      h2("What is this Shiny App?"),
+      p("Via this web-app, we aim to share all the obtained resources from a large-scale Bayesian re-analysis project. In particular, we share the re-analysed network fits which allows user to gain an insight into the particular network of interest. It has two main tabs."),
+      h3("Invidual Studies"),
+      p("This tab includes an overview of all obtained networks from the various papers. Several networks might stem from one paper. The table displays various meta-data information about the network such as citation, topic, questionnaires, sample size and number of nodes. Users can select the networks to be shown in the table with the panel on the left. By clicking on the panel, a pop-up window opens which shows three network plots. The plot on the left shows the estimated edge strength network, where the thickness and saturation of an edge represents the partial association strength. The two right plots show the edge evidence categorization. The middle plot shows all edges that have some evidence for inclusion with grey edges depicting slight but less than weak, light blue edges weak, and dark blue edges strong evidence for inclusion. The far right plot shows all edges with some evidence for edge exclusion. Grey edges indicate slight but less than weak, light red weak, and dark red strong evidence for exclusion."),
+      p("With the download button, users can obtain a list of network-specific results. Each network-specific list, contains meta-data, parameter estimates, parameter inclusion evidence, and general data information such as covariance estimates. For a detailed overview of the network-specific information see the",
+        a("background information", href = "https://osf.io/x9q84", target = "_blank"),
+        "."),
+      h3("Estimates"),
+      p("This tab shows the distribution of the parameter estimates and the density of the network (i.e., percentage of present edges). Optionally, users can choose to show the (1) Bayesian parameter estimates against the edge inclusion evidence, (2) frequentist against Bayesian parameter estimates, and (3) the percentage of (un)certainty in the networks. The subset of networks on which the plots are generated can be selected with the sidebar."),
+      br(),  # Add a line break to create space
+      h2("What is the Project?"),
+      p("Network analysis has become extremely popular in all psychological disciplines, especially in clinical psychology. Along with the enthusiasm for networks, there has been growing concern about the stability of their results. In interpreting results and accumulating our understanding across studies, we need to be aware of the potential uncertainty underlying the estimated networks."),
+      p("In this project, our goal was to assess the robustness of published psychological networks. We systematically searched and re-analyzed previously published networks to address questions such as: Is there evidence for conditional independence when an edge is missing from an estimated network, or is the edge simply too unstable to be included? Also, how much evidence do we have for the inclusion of edges? To adequately assess the robustness of the networks, we used a Bayesian approach. This approach allows quantification of the uncertainty of the networks (Huth et al., 2023); in particular, to determine the uncertainty of the estimated network structure, to obtain the statistical evidence for the inclusion or exclusion of edges, and to quantify the precision of the network parameters."),
+      p("The project was led by Karoline Huth, Sara Keetelaar, Jonas Haslbeck, and Maarten Marsman. For more information on this topic and the group, visit the ",
+        a("Bayesian Graphical Modeling website", href = "https://bayesiangraphicalmodeling.com/re-analysis/", target = "_blank"),
+        "."
+      ),
+      br(),  # Add a line break to create space
+      h2("Citation"),
+      p("Please cite the web app and the materials obtained from it accordingly. Furthermore, in case specific datasets are being used, please cite the original article. The citation can be found in the respective network information."),
+      div(style = "border: 1px solid grey; background-color: #f0f0f0; padding: 10px; margin-top: 10px;",
+          "Huth, K. B. S., Haslbeck, J. M. B., Keetelaar, S., van Holst, R., & Marsman, M. (2024). Statistical Evidence in Published Psychometric Networks: A Bayesian Re-Analysis of 144 Papers. Retrieved from osf.io/n8r9g",
+          br(),
+          actionButton("copyCitation", "Copy Citation", icon = icon("copy"))
+      ),
+      br(),
+      h2("Questions?"),
+      p("Please contact us via email."),
+      actionButton("contactBtn", "Contact", icon = icon("envelope"))
+    )
+
   ),
   tabPanel("Individual Studies",
            sidebarLayout(
