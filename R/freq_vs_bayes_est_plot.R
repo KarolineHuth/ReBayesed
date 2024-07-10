@@ -5,6 +5,7 @@
 #' @param agg_point A data frame with the estimates for each edge, for all studies.
 #'
 #' @return A scatterplot of the frequentist and Bayesian parameter estimates.
+#'
 #' @export
 
 freq_vs_bayes_est_plot <- function(agg_point){

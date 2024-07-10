@@ -1,9 +1,11 @@
-#' Parse Citation into In-text Reference, Year and DOI
+#' @title Parse Citation into In-text Reference, Year and DOI
 #'
-#' This function extracts the in-text reference, year and DOI from a citation.
+#' @description This function extracts the in-text reference, year and DOI from a citation.
 #'
 #' @param citation A character vector containing the citation in APA format.
+#'
 #' @return A list containing the in-text reference, year and DOI.
+#'
 #' @export
 parse_citation <- function(citation){
 
