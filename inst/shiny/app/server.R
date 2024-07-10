@@ -1,49 +1,160 @@
+library(NRP.web)
 library(shiny)
 library(DT)
 library(tidyverse)
 library(qgraph)
 library(ggdist)
-library(NRP.web)
 library(readxl)
+library(magrittr)
 
 # Define server logic
 server <- function(input, output, session) {
 
   # Load data
-  agg_data_list <- readRDS(system.file("extdata/AggStudyResults.RData",
+  agg_data_list <- readRDS(system.file("extdata/AggStudyResults.rds",
                                        package = "NRP.web"))
-  agg_data_level <- readRDS(system.file("extdata/StudyLevelofInclusion.RData",
+  agg_data_level <- readRDS(system.file("extdata/StudyLevelofInclusion.rds",
                                         package = "NRP.web"))
-  agg_data_point <- readRDS(system.file("extdata/EdgeSpecificEstimates.RData",
+  agg_data_point <- readRDS(system.file("extdata/EdgeSpecificEstimates.rds",
                                         package = "NRP.web"))
-  metadata <- read_excel(system.file("extdata/metadata.xlsx",
-                                     package = "NRP.web"))
+  suppressMessages({
+    metadata <- read_excel(system.file("extdata/metadata.xlsx",
+                                       package = "NRP.web"))
+  })
+  # first row is the column names
+  colnames(metadata) <- as.character(metadata[1,])
+  metadata <- metadata[-1,]
+
+  # deal with unnamed columns
+  colnames(metadata)[is.na(colnames(metadata))] <-
+    paste0("Unnamed_", seq_along(colnames(metadata))[is.na(colnames(metadata))])
 
   # Apply our metadata extraction function to each entry in agg_data_list,
   # filter by selected topics,
   # and combine in a reactive df
   table_data <- reactive({
-    lapply(agg_data_list, extract_metadata) %>%
+    agg_data_df <- lapply(agg_data_list, extract_metadata) %>%
       do.call(rbind, .) %>%
       dplyr::filter(Topic %in% input$topicCheckbox) %>%
       dplyr::filter(SampleType %in% input$clinicalCheckbox, TRUE) %>%
       rownames_to_column() %>%
-      rename("Network_ID" = "rowname")
+      rename("NetworkID" = "rowname")
+
+    metadata_df <- metadata %>%
+      dplyr::filter(NetworkID %in% agg_data_df$NetworkID) %>%
+      rename(Questionnaires = "Questionnaires used",
+             DataLink = "Repository Link") %>%
+      select(NetworkID, Questionnaires, DataLink)
+
+    merged_df <- merge(agg_data_df, metadata_df, by = "NetworkID", all.x = TRUE) %>%
+      # mutate(Questionnaires = as.factor(Questionnaires)) %>%
+      select(Reference, Year, DOI, Topic, Subtopic, Questionnaires, SampleType,
+             Sample.size, Nodes, Edges, Model, DataLink, NetworkID)
+
+    return(merged_df)
   })
 
+
   ### INDIVIDUAL STUDIES START ###
+  shinyInput <- function(FUN, len, id, label = NULL, ...) {
+    inputs <- character(len)
+    for (i in seq_len(len)) {
+      inputs[i] <- as.character(FUN(paste0(id, i), label, ...))
+    }
+    inputs
+  }
+
+
+  js_combined <- c(
+    "$(document).on('click', '[id^=checkb]', function(){",
+    "  var id = this.getAttribute('id');",
+    "  var i = parseInt(id.replace('checkb', ''));",
+    "  var value = $(this).prop('checked');",
+    "  Shiny.setInputValue('checkbox_state', {row: i, value: value}, {priority: 'event'});",
+    "});",
+    "$(document).on('click', '[id^=plotBtn]', function(){",
+    "  var id = this.getAttribute('id');",
+    "  var i = parseInt(id.replace('plotBtn', ''));",
+    "  Shiny.setInputValue('plot_button_click', i);",
+    "});",
+    "$(document).on('shiny:inputchanged', function(event) {",
+    "  if (event.name === 'select_all') {",
+    "    var selectAll = event.value;",
+    "    if (selectAll) {",
+    "      $('[id^=checkb]').prop('checked', true).change();",
+    "    } else {",
+    "      $('[id^=checkb]').prop('checked', false).change();",
+    "    }",
+    "    // Trigger an input change to update the R server",
+    "    var checkedBoxes = $('[id^=checkb]').map(function(){ return this.checked; }).get();",
+    "    Shiny.setInputValue('all_checkboxes', checkedBoxes, {priority: 'event'});",
+    "  }",
+    "});"
+  )
+
   # Render indStudiesTable
   output$indStudiesTable <- renderDT({
-    datatable(table_data(), filter = 'top', options = list(pageLength = 25), selection = 'single')
-  }, server = TRUE)
+    datatable(cbind(action = shinyInput(actionButton, nrow(table_data()), "plotBtn", "Plots"),
+                    checkb = shinyInput(checkboxInput, nrow(table_data()), "checkb"),
+                    table_data()),
+              colnames = c("", "Select", "Authors", "Year", "DOI", "Topic", "Subtopic",
+                           "Questionnaires", "Sample Type", "Sample Size", "Nodes",
+                           "Edges", "Model", "Data Link", "Network ID"),
+              selection = 'none',
+              callback = JS(js_combined),
+              escape = c(-2, -3, -5, -14), # Allows HTML in cells
+              filter = 'top',
+              options = list(
+                autoWidth = TRUE, # THIS FUCKS UP THE BUTTON WIDTH -> MAKE FALSE, THEN MANUALLY SET WIDTHS FOR COLS
+                scrollX = TRUE,
+                pageLength = 100,
+                columnDefs = list(
+                  list(targets = 1, width = '4%'),
+                  list(targets = 2, width = '6%'),
+                  list(targets = 3, width = '10%'),
+                  list(targets = 4, width = '3%'),
+                  list(targets = 5, width = '22%',
+                       render = JS( # Render DOI as a clickable hyperlink
+                         "function(data, type, row, meta) {",
+                         " return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
+                         "}"
+                      )
+                    ),
+                  list(targets = 6, width = '9%'),
+                  list(targets = 7, width = '10%'),
+                  list(targets = 8, width = '18%'),
+                  list(targets = 9, width = '11%'),
+                  list(targets = 10, width = '18%'),
+                  list(targets = 11, width = '4%'),
+                  list(targets = 12, width = '2%'),
+                  list(targets = 13, width = '2%'),
+                  list(targets = 14, width = '10%',
+                    # Render Data Link as a clickable hyperlink, exclude if NA
+                    render = JS(
+                      "function(data, type, row, meta) {",
+                      " if (data === null) {",
+                      "  return '';",
+                      " } else {",
+                      "  return '<a href=\"' + data + '\" target=\"_blank\">' + data + '</a>';",
+                      " }",
+                      "}"
+                      )
+                    )
+                  # list(targets = 15, width = '2%'),
+                  # list(targets = 16, width = '2%')
+                  )
+                )
+              )
+    })
 
   # Render par_plot and edge_ plots
-  observeEvent(input$indStudiesTable_rows_selected, {
-    # Get the selected row
-    selected_row <- input$indStudiesTable_rows_selected
+  observeEvent(input$plot_button_click, {
+    # Get the clicked row
+    clicked_row <- input$plot_button_click
 
-    if (length(selected_row) == 1) {
-      selected_network <- table_data()[selected_row, "Network_ID"]
+    if (!is.null(clicked_row)) {
+      # Get the ID + data of the clicked network
+      selected_network <- table_data()[clicked_row, "NetworkID"]
       network_results <- agg_data_list[[selected_network]]
 
       # Render parameter estimate plot
@@ -64,7 +175,7 @@ server <- function(input, output, session) {
       # Show plots in pop-up window
       showModal(
         modalDialog(
-          title = "test",
+          title = "Network Plots",
           fluidRow(
             column(4, plotOutput("par_plot")),
             column(4, plotOutput("edge_inc_plot")),
@@ -75,37 +186,81 @@ server <- function(input, output, session) {
           footer = NULL,
           size = "l",
           tags$style(HTML("
-            .modal-dialog{
-            width: 80%;
-            max-width: 1200px;
-            }"
-                          )
-                     )
-          )
+          .modal-dialog{
+          width: 80%;
+          max-width: 1200px;
+          }"
+          ))
         )
+      )
     }
   })
 
+
+  # Reactive variable to store checked network IDs
+  checked_network_ids <- reactiveVal(character())
+
+  # Observe network checkbox changes
+  observeEvent(input$checkbox_state, {
+    checkbox_state <- input$checkbox_state # get which checkbox was clicked
+    row <- checkbox_state$row # get the row of the clicked checkbox
+    value <- checkbox_state$value # get what the new value of the clicked checkbox is
+
+    current_ids <- checked_network_ids() # get the current list of checked network IDs
+
+    clicked_id <- table_data()[row, "NetworkID"] # get the Network ID of the clicked checkbox
+    if (value) {
+      # add Network ID to list if checked
+      checked_network_ids(unique(c(current_ids, clicked_id)))
+    } else {
+      # remove Network ID from list if unchecked
+      checked_network_ids(setdiff(current_ids, clicked_id))
+    }
+  })
+
+  # observe all_checkboxes input to handle select_all button
+  observeEvent(input$all_checkboxes, {
+    all_checked <- input$all_checkboxes
+    if (is.null(all_checked))
+      return()
+
+    # get the Network IDs of all currently displayed rows
+    network_ids <- table_data()[input$indStudiesTable_rows_all, "NetworkID"]
+
+    if (all(all_checked)) {
+      # All checkboxes are selected
+      checked_network_ids(network_ids)
+    } else {
+      # No checkboxes are selected
+      checked_network_ids(character())
+    }
+  })
+
+  # observe({
+  #   print(checked_network_ids())
+  # })
+
+
   # Download Handler for Table Data
-  output$downloadTable <- downloadHandler(
+  output$downloadIndStudiesTable <- downloadHandler(
     filename = function() {
-      paste("network-data-", Sys.Date(), ".Rdata", sep="")
+      paste("filtered-network-data-", Sys.Date(), ".Rdata", sep="")
     },
     content = function(file) {
-      saveRDS(table_data(), file)
+      saveRDS(agg_data_list[names(agg_data_list) %in% checked_network_ids()],
+              file)
     }
   )
 
   # Download Handler for Network Data
   output$downloadNetworkData <- downloadHandler(
     filename = function() {
-      row_name <- rownames(table_data()[input$indStudiesTable_rows_selected, ])
-      name = paste(row_name, ".Rdata", sep="")
+      name = paste(table_data()[input$plot_button_click, "NetworkID"], ".Rdata", sep="")
       return(name)
     },
     content = function(file) {
-      selected_row <- input$indStudiesTable_rows_selected
-      network_results <- agg_data_list[[selected_row]]
+      selected_network <- table_data()[input$plot_button_click, "NetworkID"]
+      network_results <- agg_data_list[[selected_network]]
       saveRDS(network_results, file)
     }
   )
@@ -114,8 +269,8 @@ server <- function(input, output, session) {
 
   ### METADATA START ###
   metadata_r <- reactive({
-    warning(input$rank_list_1)
-    warning(input$rank_list_2)
+    # warning(input$rank_list_1)
+    # warning(input$rank_list_2)
 
     return("AAA")
   })
@@ -137,41 +292,127 @@ server <- function(input, output, session) {
 
   ### ESTIMATES START ###
 
-  # Filter data based on user input
-  estimates_data <- reactive({
-    lapply(agg_data_list, extract_metadata) %>%
-    do.call(rbind, .) %>%
-    dplyr::filter(Topic %in% input$topicCheckboxEstimates) %>%
-    dplyr::filter(SampleType %in% input$clinicalCheckboxEstimates) %>%
-    dplyr::filter(Year >= input$yearSliderEstimates[1] & Year <= input$yearSliderEstimates[2]) %>%
-    dplyr::filter(Nodes >= input$nNodesSliderEstimates[1] & Nodes <= input$nNodesSliderEstimates[2]) %>%
-    dplyr::filter(Edges >= input$nEdgesSliderEstimates[1] & Edges <= input$nEdgesSliderEstimates[2]) %>%
-    dplyr::filter(Sample.size >= input$sampleSizeEstimates[1] & Sample.size <= input$sampleSizeEstimates[2]) %>%
-    rownames_to_column() %>%
-    rename("Network_ID" = "rowname") %>%
-    dplyr::select(Network_ID) %>%
-    pull()
+  # If no networks are selected in 'Individual Studies', disable 'Use selected networks' checkbox
+  observeEvent(checked_network_ids(), {
+    shinyjs::toggleState('useSelectedNetworks',
+                         condition = length(checked_network_ids()) != 0)
+
+    # Reset the 'Use selected networks' checkbox if no networks are selected
+    #  (relevant if user:
+    #  1. selects networks
+    #  2. then checks 'Use selected networks'
+    #  3. then unselects all networks in 'Individual Studies' pane)
+    if(checked_network_ids() %>% length() == 0)
+      updateCheckboxInput(session, "useSelectedNetworks", value = FALSE)
+  })
+
+  # If 'Use selected networks' is checked, disable all other inputs
+  observeEvent(input$useSelectedNetworks, {
+    shinyjs::toggleState('topicCheckboxEstimates',
+                         condition = !input$useSelectedNetworks)
+    shinyjs::toggleState('clinicalCheckboxEstimates',
+                         condition = !input$useSelectedNetworks)
+    shinyjs::toggleState('yearSliderEstimates',
+                         condition = !input$useSelectedNetworks)
+    shinyjs::toggleState('nNodesSliderEstimates',
+                         condition = !input$useSelectedNetworks)
+    shinyjs::toggleState('sampleSizeEstimates',
+                         condition = !input$useSelectedNetworks)
+  }, ignoreNULL = TRUE)
+
+
+
+  # Determine what data to use for 'Estimates' plots
+  estimates_data_real <- reactive({
+    # Get the aggregated data
+    estimates_df <- agg_data_list %>%
+      lapply(., extract_metadata) %>%
+      do.call(rbind, .) %>%
+      rownames_to_column() %>%
+      rename("NetworkID" = "rowname")
+
+    # Check if user has selected any studies in the 'Individual Studies' pane AND
+    #       if user wants to use selected networks
+    if(length(checked_network_ids()) > 0 & input$useSelectedNetworks){
+      # Use selected networks
+      estimates_df %<>%
+        dplyr::filter(NetworkID %in% checked_network_ids())
+
+    } else {
+      # Use all networks and filter based on user input in sidebar
+      estimates_df %<>%
+        dplyr::filter(Topic %in% input$topicCheckboxEstimates) %>%
+        dplyr::filter(SampleType %in% input$clinicalCheckboxEstimates) %>%
+        dplyr::filter(Year >= input$yearSliderEstimates[1] & Year <= input$yearSliderEstimates[2]) %>%
+        dplyr::filter(Nodes >= input$nNodesSliderEstimates[1] & Nodes <= input$nNodesSliderEstimates[2]) %>%
+        dplyr::filter(Sample.size >= input$sampleSizeEstimates[1] & Sample.size <= input$sampleSizeEstimates[2])
+    }
+    # Select the network IDs
+    estimates_df %<>%
+      dplyr::select(NetworkID) %>%
+      pull()
+
+    return(estimates_df)
   })
 
   # Render freqVsBayesInclBar
-  output$freqVsBayesInclBar <- renderPlot({
-    warning(estimates_data())
-    freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$networkID %in% estimates_data(),])
+  output$netDensityDensity <- renderPlot({
+    net_density_density_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
   })
 
-  # Render edgeEstVsPostInclProb
-  output$edgeEstVsPostInclProb <- renderPlot({
-    edge_est_vs_post_incl_prob(agg_data_point[agg_data_point$networkID %in% estimates_data(),])
+  # Render netEdgeDensity
+  output$netEdgeDensity <- renderPlot({
+    net_edge_density_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
   })
 
-  # Render freqVsBayesEstPlot
-  output$freqEstVsBayesEst <- renderPlot({
-    freq_vs_bayes_est_plot(agg_data_point[agg_data_point$networkID %in% estimates_data(),])
+  ## Render optional plots based on plot checkbox selection
+  # Generate plots based on checkbox selection and estimates_data_real
+  plot_reactive <- reactive({
+    fvb_incl_plot <- if ("fvb_incl" %in% input$estimatesPlotsCheckbox) {
+      freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$networkID %in% estimates_data_real(),])
+    } else {
+      NULL
+    }
+
+    edge_est_post_incl_plot <- if ("edge_est_post_incl" %in% input$estimatesPlotsCheckbox) {
+      edge_est_vs_post_incl_prob(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
+    } else {
+      NULL
+    }
+
+    fvb_est_plot <- if ("fvb_est" %in% input$estimatesPlotsCheckbox) {
+      freq_vs_bayes_est_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
+    } else {
+      NULL
+    }
+
+    list(
+      fvb_incl_plot = fvb_incl_plot,
+      edge_est_post_incl_plot = edge_est_post_incl_plot,
+      fvb_est_plot = fvb_est_plot
+    )
   })
 
-  output$netDensity <- renderPlot({
-    net_density_plot(agg_data_point[agg_data_point$networkID %in% estimates_data(),])
+  # Observe the reactive expression and render plots
+  observe({
+    plots <- plot_reactive()
+
+    output$freqVsBayesInclBar <- renderPlot({plots$fvb_incl_plot})
+    output$edgeEstVsPostInclProb <- renderPlot({plots$edge_est_post_incl_plot})
+    output$freqEstVsBayesEst <- renderPlot({plots$fvb_est_plot})
   })
+
+
+  # # Render edgeEstVsPostInclProb
+  # output$edgeEstVsPostInclProb <- renderPlot({
+  #   edge_est_vs_post_incl_prob(agg_data_point[agg_data_point$networkID %in% estimates_data(),])
+  # })
+  #
+  # # Render freqVsBayesEstPlot
+  # output$freqEstVsBayesEst <- renderPlot({
+  #   freq_vs_bayes_est_plot(agg_data_point[agg_data_point$networkID %in% estimates_data(),])
+  # })
+
 
   ### ESTIMATES END ###
 }

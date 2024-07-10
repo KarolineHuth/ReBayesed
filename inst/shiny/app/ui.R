@@ -2,24 +2,15 @@ library(shiny)
 library(DT)
 library(bslib)
 library(sortable)
+library(shinyjs)
 
-labels <- list(
-  "one",
-  "two",
-  "three",
-  htmltools::tags$div(
-    htmltools::em("Complex"), " html tag without a name"
-  ),
-  "five" = htmltools::tags$div(
-    htmltools::em("Complex"), " html tag with name: 'five'"
-  )
-)
-
-rank_list_swap <- rank_list(
-  text = "Notice that dragging causes items to swap",
-  labels = labels,
-  input_id = "rank_list_swap",
-  options = sortable_options(swap = TRUE)
+ui <- fluidPage(
+  tags$head(tags$style(HTML("
+    table.dataTable tbody td:nth-child(2) {
+      width: 50px;
+    }
+  "))),
+  # Your other UI components
 )
 
 # Define UI
@@ -28,6 +19,10 @@ ui <- navbarPage(
   "App Title",
   tabPanel("About",
            fluidPage(
+             tags$head(
+               tags$style(HTML("table {table-layout: fixed;")),
+               tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"),
+               ),
              h3("About"),
              p("Cool logo"),
              p("Short explainer text"),
@@ -39,6 +34,7 @@ ui <- navbarPage(
   tabPanel("Individual Studies",
            sidebarLayout(
              sidebarPanel(
+               width = 3,
                checkboxGroupInput("topicCheckbox",
                                   "Topics",
                                   choices = c("Clinical",
@@ -63,16 +59,20 @@ ui <- navbarPage(
                  condition = "TRUE",
                  checkboxGroupInput("clinicalCheckbox",
                                     "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("Population",
+                                    choices = c("General Population" = "Population",
                                                 "Clinical",
                                                 "Mixed"),
                                     selected = "Population"
                                     )
                ),
-               downloadButton("downloadTable",
-                              "Download Table as RDS")
+               checkboxInput("select_all",
+                             "Select/Deselect All"),
+               br(),
+               downloadButton("downloadIndStudiesTable",
+                              "Download Filtered Network Results as RDS")
              ),
              mainPanel(
+               width = 9,
                DTOutput("indStudiesTable"),
                br()
              )
@@ -81,6 +81,7 @@ ui <- navbarPage(
   tabPanel("Meta Data",
            sidebarLayout(
              sidebarPanel(
+               width = 4,
                checkboxGroupInput("topicCheckboxMetadata",
                                   "Topics",
                                   choices = c("Clinical",
@@ -106,7 +107,7 @@ ui <- navbarPage(
                  condition = "TRUE",
                  checkboxGroupInput("clinicalCheckboxMetadata",
                                     "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("Population",
+                                    choices = c("General Population" = "Population",
                                                 "Clinical",
                                                 "Mixed"),
                                     selected = "Population"
@@ -126,13 +127,6 @@ ui <- navbarPage(
                            value = c(3, 97),
                            step = 1
                ),
-               sliderInput("nEdgesSliderMetadata",
-                           "Number of Edges",
-                           min = 3,
-                           max = 4656,
-                           value = c(3, 4656),
-                           step = 1
-               ),
                sliderInput("sampleSizeMetadata",
                            "Sample Size",
                            min = 23,
@@ -145,6 +139,7 @@ ui <- navbarPage(
                )
              ),
              mainPanel(
+               width = 8,
                fluidRow(
                  column(
                    width = 12,
@@ -181,6 +176,20 @@ ui <- navbarPage(
   tabPanel("Estimates",
            sidebarLayout(
              sidebarPanel(
+               width = 4,
+               shinyjs::useShinyjs(),
+               checkboxInput("useSelectedNetworks",
+                             "Use Networks Selected in 'Individual Studies' Tab"),
+               checkboxGroupInput(
+                 "estimatesPlotsCheckbox",
+                 "Plots",
+                 choices = c("Frequentist vs. Bayesian Inclusion Probability" = "fvb_incl",
+                             "Edge Estimate vs. Posterior Inclusion Probability" = "edge_est_post_incl",
+                             "Frequentist Estimate vs. Bayesian Estimate" = "fvb_est"),
+                 selected = c("fvb_incl",
+                              "edge_est_post_incl",
+                              "fvb_est")
+               ),
                checkboxGroupInput("topicCheckboxEstimates",
                                   "Topics",
                                   choices = c("Clinical",
@@ -206,7 +215,7 @@ ui <- navbarPage(
                  condition = "TRUE",
                  checkboxGroupInput("clinicalCheckboxEstimates",
                                     "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("Population",
+                                    choices = c("General Population" = "Population",
                                                 "Clinical",
                                                 "Mixed"),
                                     selected = "Population"
@@ -226,32 +235,31 @@ ui <- navbarPage(
                            value = c(3, 97),
                            step = 1
                ),
-               sliderInput("nEdgesSliderEstimates",
-                           "Number of Edges",
-                           min = 3,
-                           max = 4656,
-                           value = c(3, 4656),
-                           step = 1
-               ),
                sliderInput("sampleSizeEstimates",
                            "Sample Size",
                            min = 23,
-                           max = 388286,
-                           value = c(23, 388286),
+                           max = 10000,
+                           value = c(23, 10000),
                            step = 1
                ),
+               checkboxInput("sampleSizeOutliersEstimates",
+                             "Include Sample Size Outliers (n > 10k)"),
                downloadButton("downloadTableEstimates",
                               "Download Table as RDS"
                )
              ),
              mainPanel(
+               width = 8,
+               fluidRow(
+                 column(6, plotOutput("netDensityDensity")),
+                 column(6, plotOutput("netEdgeDensity")),
+               ),
                fluidRow(
                  column(6, plotOutput("freqVsBayesInclBar")),
                  column(6, plotOutput("edgeEstVsPostInclProb"))
                ),
                fluidRow(
                  column(6, plotOutput("freqEstVsBayesEst")),
-                 column(6, plotOutput("netDensity"))
                )
              )
            )

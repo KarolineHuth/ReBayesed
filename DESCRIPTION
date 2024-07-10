@@ -7,10 +7,15 @@ Maintainer: Konrad Mikalauskas <k.mikalauskas@uva.nl>
 Description: A brief description
 Imports:
   shiny,
+  shinyjs,
+  readxl,
   DT,
   tidyverse,
+  magrittr,
   qgraph,
-  bslib
+  ggdist,
+  bslib,
+  sortable
 License: What license it uses
 RoxygenNote: 7.2.3
 Encoding: UTF-8
