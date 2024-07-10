@@ -64,17 +64,6 @@ server <- function(input, output, session) {
     inputs
   }
 
-  # js_button <- c(
-  #   "$(document).on('click', '[id^=plotBtn]', function(){",
-  #   "  event.stopPropagation();",  # Prevent the cell selection
-  #   "  event.preventDefault();",
-  #   "  var id = this.getAttribute('id');",
-  #   "  var i = parseInt(id.replace('plotBtn', ''));",
-  #   "  Shiny.setInputValue('plot_button_click', i);",
-  #   "});"
-  # )
-
-
 
   js_combined <- c(
     "$(document).on('click', '[id^=checkb]', function(){",
@@ -108,7 +97,7 @@ server <- function(input, output, session) {
     datatable(cbind(action = shinyInput(actionButton, nrow(table_data()), "plotBtn", "Plots"),
                     checkb = shinyInput(checkboxInput, nrow(table_data()), "checkb"),
                     table_data()),
-              colnames = c("", "Selected", "Authors", "Year", "DOI", "Topic", "Subtopic",
+              colnames = c("", "Select", "Authors", "Year", "DOI", "Topic", "Subtopic",
                            "Questionnaires", "Sample Type", "Sample Size", "Nodes",
                            "Edges", "Model", "Data Link", "Network ID"),
               selection = 'none',
@@ -116,21 +105,30 @@ server <- function(input, output, session) {
               escape = c(-2, -3, -5, -14), # Allows HTML in cells
               filter = 'top',
               options = list(
-                autoWidth = TRUE, # THIS FUCKS UP THE BUTTON WIDTH
+                autoWidth = TRUE, # THIS FUCKS UP THE BUTTON WIDTH -> MAKE FALSE, THEN MANUALLY SET WIDTHS FOR COLS
                 scrollX = TRUE,
                 pageLength = 100,
                 columnDefs = list(
-                  list(
-                    targets = 5,
-                    # Render DOI as a clickable hyperlink
-                    render = JS(
-                      "function(data, type, row, meta) {",
-                      " return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
-                      "}"
+                  list(targets = 1, width = '4%'),
+                  list(targets = 2, width = '6%'),
+                  list(targets = 3, width = '10%'),
+                  list(targets = 4, width = '3%'),
+                  list(targets = 5, width = '22%',
+                       render = JS( # Render DOI as a clickable hyperlink
+                         "function(data, type, row, meta) {",
+                         " return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
+                         "}"
                       )
                     ),
-                  list(
-                    targets = 14,
+                  list(targets = 6, width = '9%'),
+                  list(targets = 7, width = '10%'),
+                  list(targets = 8, width = '18%'),
+                  list(targets = 9, width = '11%'),
+                  list(targets = 10, width = '18%'),
+                  list(targets = 11, width = '4%'),
+                  list(targets = 12, width = '2%'),
+                  list(targets = 13, width = '2%'),
+                  list(targets = 14, width = '10%',
                     # Render Data Link as a clickable hyperlink, exclude if NA
                     render = JS(
                       "function(data, type, row, meta) {",
@@ -142,6 +140,8 @@ server <- function(input, output, session) {
                       "}"
                       )
                     )
+                  # list(targets = 15, width = '2%'),
+                  # list(targets = 16, width = '2%')
                   )
                 )
               )
@@ -365,9 +365,9 @@ server <- function(input, output, session) {
     net_edge_density_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
   })
 
-  # Render freqVsBayesInclBar if "fvb_incl" is selected in estimatesPlotsCheckbox
-  observeEvent(input$estimatesPlotsCheckbox, {
-
+  ## Render optional plots based on plot checkbox selection
+  # Generate plots based on checkbox selection and estimates_data_real
+  plot_reactive <- reactive({
     fvb_incl_plot <- if ("fvb_incl" %in% input$estimatesPlotsCheckbox) {
       freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$networkID %in% estimates_data_real(),])
     } else {
@@ -386,11 +386,22 @@ server <- function(input, output, session) {
       NULL
     }
 
-    output$freqVsBayesInclBar <- renderPlot({fvb_incl_plot})
-    output$edgeEstVsPostInclProb <- renderPlot({edge_est_post_incl_plot})
-    output$freqEstVsBayesEst <- renderPlot({fvb_est_plot})
+    list(
+      fvb_incl_plot = fvb_incl_plot,
+      edge_est_post_incl_plot = edge_est_post_incl_plot,
+      fvb_est_plot = fvb_est_plot
+    )
+  })
 
-  }, ignoreNULL = FALSE)
+  # Observe the reactive expression and render plots
+  observe({
+    plots <- plot_reactive()
+
+    output$freqVsBayesInclBar <- renderPlot({plots$fvb_incl_plot})
+    output$edgeEstVsPostInclProb <- renderPlot({plots$edge_est_post_incl_plot})
+    output$freqEstVsBayesEst <- renderPlot({plots$fvb_est_plot})
+  })
+
 
   # # Render edgeEstVsPostInclProb
   # output$edgeEstVsPostInclProb <- renderPlot({

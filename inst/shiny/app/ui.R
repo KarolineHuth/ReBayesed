@@ -34,6 +34,7 @@ ui <- navbarPage(
   tabPanel("Individual Studies",
            sidebarLayout(
              sidebarPanel(
+               width = 3,
                checkboxGroupInput("topicCheckbox",
                                   "Topics",
                                   choices = c("Clinical",
@@ -71,6 +72,7 @@ ui <- navbarPage(
                               "Download Filtered Network Results as RDS")
              ),
              mainPanel(
+               width = 9,
                DTOutput("indStudiesTable"),
                br()
              )
@@ -79,6 +81,7 @@ ui <- navbarPage(
   tabPanel("Meta Data",
            sidebarLayout(
              sidebarPanel(
+               width = 4,
                checkboxGroupInput("topicCheckboxMetadata",
                                   "Topics",
                                   choices = c("Clinical",
@@ -136,6 +139,7 @@ ui <- navbarPage(
                )
              ),
              mainPanel(
+               width = 8,
                fluidRow(
                  column(
                    width = 12,
@@ -172,6 +176,7 @@ ui <- navbarPage(
   tabPanel("Estimates",
            sidebarLayout(
              sidebarPanel(
+               width = 4,
                shinyjs::useShinyjs(),
                checkboxInput("useSelectedNetworks",
                              "Use Networks Selected in 'Individual Studies' Tab"),
@@ -233,15 +238,18 @@ ui <- navbarPage(
                sliderInput("sampleSizeEstimates",
                            "Sample Size",
                            min = 23,
-                           max = 388286,
-                           value = c(23, 388286),
+                           max = 10000,
+                           value = c(23, 10000),
                            step = 1
                ),
+               checkboxInput("sampleSizeOutliersEstimates",
+                             "Include Sample Size Outliers (n > 10k)"),
                downloadButton("downloadTableEstimates",
                               "Download Table as RDS"
                )
              ),
              mainPanel(
+               width = 8,
                fluidRow(
                  column(6, plotOutput("netDensityDensity")),
                  column(6, plotOutput("netEdgeDensity")),

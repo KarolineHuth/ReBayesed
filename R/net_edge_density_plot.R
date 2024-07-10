@@ -9,7 +9,7 @@
 
 net_edge_density_plot <- function(agg_point){
   # calculate median and HDI
-  hdi <- ggdist::median_hdi(agg_point$BGGM_estimate, na.rm = TRUE, .width = 0.95)
+  hdi <- ggdist::median_hdci(agg_point$BGGM_estimate, na.rm = TRUE, .width = 0.95)
 
   # format HDI values (APA7)
   hdi_min_text <- if(hdi$ymin == 0){
@@ -67,7 +67,7 @@ net_edge_density_plot <- function(agg_point){
              color = "black",
              vjust = -0.5) +
     labs(title = "Density Plot with 95% HDI and Median ",
-         x = "Network Density",
+         x = "Edge Density",
          y = "")
 
   return(plot)
