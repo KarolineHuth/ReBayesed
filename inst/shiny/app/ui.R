@@ -95,10 +95,10 @@ ui <- navbarPage(
                                     )
                ),
                checkboxInput("select_all",
-                             "Select/Deselect All"),
+                             "Select/Deselect Filtered"), # make "All" if all checkboxes above TRUE
                br(),
                downloadButton("downloadIndStudiesTable",
-                              "Download Filtered Network Results as RDS")
+                              "Download Selected Network Results as RDS")
              ),
              mainPanel(
                width = 9,
@@ -255,7 +255,8 @@ ui <- navbarPage(
                            min = 2015,
                            max = 2024,
                            value = c(2015, 2024),
-                           step = 1
+                           step = 1,
+                           sep = ""
                ),
                sliderInput("nNodesSliderEstimates",
                            "Number of Nodes",
@@ -267,12 +268,12 @@ ui <- navbarPage(
                sliderInput("sampleSizeEstimates",
                            "Sample Size",
                            min = 23,
-                           max = 10000,
-                           value = c(23, 10000),
+                           max = 5000,
+                           value = c(23, 5000),
                            step = 1
                ),
                checkboxInput("sampleSizeOutliersEstimates",
-                             "Include Sample Size Outliers (n > 10k)"),
+                             "Include Sample Size Outliers (n > 5k)"),
                downloadButton("downloadTableEstimates",
                               "Download Table as RDS"
                )

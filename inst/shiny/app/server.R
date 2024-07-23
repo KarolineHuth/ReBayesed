@@ -43,10 +43,32 @@ server <- function(input, output, session) {
   # Load data
   agg_data_list <- readRDS(system.file("extdata/AggStudyResults.rds",
                                        package = "NRP.web"))
-  agg_data_level <- readRDS(system.file("extdata/StudyLevelofInclusion.rds",
+  agg_data_level <- readRDS(system.file("extdata/IndividualStudyData.rds",
                                         package = "NRP.web"))
   agg_data_point <- readRDS(system.file("extdata/EdgeSpecificEstimates.rds",
                                         package = "NRP.web"))
+
+  ## Fix NaN/Inf in inclusion prob / BF issue:
+  # Get the number of columns to check/fix
+  n_to_fix <- grepl("BF", names(agg_data_point)) %>% sum()
+  if(n_to_fix > 0){ # If there are columns to fix:
+    # Get the columns to check and fix
+    check_cols <- agg_data_point[grepl("BF", names(agg_data_point))]
+    fix_cols <- agg_data_point[grepl("inc_prob", names(agg_data_point))]
+
+    for(i in 1:n_to_fix){ # For each column to check/fix:
+      # Check for rows with infinite evidence for inclusion
+      fix_rows <- is.infinite(check_cols[,i])
+
+      if(sum(fix_rows) > 0) # If there are rows to fix:
+        # Set the inclusion probability to 1 (instead of default NaN) for rows with infinite evidence for inclusion
+        fix_cols[fix_rows, i] <- 1
+    }
+    # Replace the fixed columns in the original data
+    agg_data_point[grepl("inc_prob", names(agg_data_point))] <- fix_cols
+  }
+
+  # Load metadata
   suppressMessages({
     metadata <- read_excel(system.file("extdata/metadata.xlsx",
                                        package = "NRP.web"))
@@ -350,6 +372,15 @@ server <- function(input, output, session) {
                          condition = !input$useSelectedNetworks)
   }, ignoreNULL = TRUE)
 
+  # If 'sampleSizeEstimates' max value is NOT set to 5000, disable 'sampleSizeOutliersEstimates' checkbox
+  observeEvent(input$sampleSizeEstimates, {
+    shinyjs::toggleState('sampleSizeOutliersEstimates',
+                         condition = input$sampleSizeEstimates[2] == 5000)
+
+    # Reset the 'sampleSizeOutliersEstimates' checkbox if max value is not 5000
+    if(input$sampleSizeEstimates[2] != 5000)
+      updateCheckboxInput(session, "sampleSizeOutliersEstimates", value = FALSE)
+  }, ignoreNULL = TRUE)
 
 
   # Determine what data to use for 'Estimates' plots
@@ -375,7 +406,13 @@ server <- function(input, output, session) {
         dplyr::filter(SampleType %in% input$clinicalCheckboxEstimates) %>%
         dplyr::filter(Year >= input$yearSliderEstimates[1] & Year <= input$yearSliderEstimates[2]) %>%
         dplyr::filter(Nodes >= input$nNodesSliderEstimates[1] & Nodes <= input$nNodesSliderEstimates[2]) %>%
-        dplyr::filter(Sample.size >= input$sampleSizeEstimates[1] & Sample.size <= input$sampleSizeEstimates[2])
+        dplyr::filter(Sample.size >= input$sampleSizeEstimates[1]) # Filter based on min sample size first
+
+      # If 'sampleSizeOutliersEstimates' is unchecked (most cases), filter based on max sample size too
+      if(!input$sampleSizeOutliersEstimates){
+        estimates_df %<>%
+          dplyr::filter(Sample.size <= input$sampleSizeEstimates[2])
+      }
     }
     # Select the network IDs
     estimates_df %<>%
@@ -387,31 +424,31 @@ server <- function(input, output, session) {
 
   # Render freqVsBayesInclBar
   output$netDensityDensity <- renderPlot({
-    net_density_density_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
+    net_density_density_plot(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
   })
 
   # Render netEdgeDensity
   output$netEdgeDensity <- renderPlot({
-    net_edge_density_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
+    net_edge_density_plot(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
   })
 
   ## Render optional plots based on plot checkbox selection
   # Generate plots based on checkbox selection and estimates_data_real
   plot_reactive <- reactive({
     fvb_incl_plot <- if ("fvb_incl" %in% input$estimatesPlotsCheckbox) {
-      freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$networkID %in% estimates_data_real(),])
+      freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$NetworkID %in% estimates_data_real(),])
     } else {
       NULL
     }
 
     edge_est_post_incl_plot <- if ("edge_est_post_incl" %in% input$estimatesPlotsCheckbox) {
-      edge_est_vs_post_incl_prob(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
+      edge_est_vs_post_incl_prob(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
     } else {
       NULL
     }
 
     fvb_est_plot <- if ("fvb_est" %in% input$estimatesPlotsCheckbox) {
-      freq_vs_bayes_est_plot(agg_data_point[agg_data_point$networkID %in% estimates_data_real(),])
+      freq_vs_bayes_est_plot(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
     } else {
       NULL
     }
