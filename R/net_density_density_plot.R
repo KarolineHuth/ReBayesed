@@ -10,7 +10,7 @@
 net_density_density_plot <- function(agg_point){
   # compute network densities
   density_data <- agg_point %>%
-    group_by(networkID) %>%
+    group_by(NetworkID) %>%
     summarise(n = n(),
               density = sum(BGGM_inc_prob > .5)/n) %>%
     ungroup()
@@ -32,6 +32,7 @@ net_density_density_plot <- function(agg_point){
   }
 
   # create plot
+  set.seed(1) # for consistent jitter
   plot <- density_data %>%
     ggplot(aes(x=density)) +
     ggdist::stat_halfeye(.width = 0.95, point_interval = median_hdci,

@@ -31,6 +31,7 @@ net_edge_density_plot <- function(agg_point){
   }
 
   # create plot
+  set.seed(1) # for consistent jitter
   plot <- agg_point %>%
     ggplot(aes(x=BGGM_estimate)) +
     ggdist::stat_halfeye(.width = 0.95, point_interval = median_hdci,
@@ -41,7 +42,7 @@ net_edge_density_plot <- function(agg_point){
                 width = 0, height = 0.025, color = "black", shape = 1, alpha = 0.1, size = 0.025) +
     scale_x_continuous(limits=c(-0.7, 0.7),
                        breaks=c(-0.6, -0.4, -0.2, 0, .2,.4,0.6)) +
-    gg.theme("clean") +
+    # gg.theme("clean") +
     # annotate("text", x = hdi$y, y = 0.12,
     #          label = paste0("Median: ", str_sub(round(hdi$y, 3), 2)), color = "black", vjust = -0.5) +
     # annotate("text", x = hdi$ymin, y = 0.02,

@@ -33,6 +33,7 @@ freq_vs_bayes_incl_bar <- function(agg_level){
   #   theme(legend.position="top") +
   #   labs(title ="Frequentist vs. Bayesian Evidence for Edge Inclusion", x = "", y = "", fill = "")
 
+  set.seed(1) # for consistent jittering
   plot <- agg_level |>
     mutate(Category = factor(Category,
                              levels = c('included', 'weak included', 'inconclusive', 'weak excluded', 'excluded'))) |>
