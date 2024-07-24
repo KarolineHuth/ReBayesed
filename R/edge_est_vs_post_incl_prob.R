@@ -18,15 +18,19 @@ edge_est_vs_post_incl_prob <- function(agg_point){
     geom_hline(aes(yintercept=log(3)),linetype=2, color = "#86a2b9") +
     geom_hline(aes(yintercept=log(10)),linetype=2, color = "#36648b") +
     geom_point(shape = 20, size = 2) +
-    # annotate("text", x = 0.5, y = 3.12, label = "^", vjust = -1.5, size = 8, color = "black") +  # Indicator for points above y limit
+    annotate("text", x = 0, y = log(30), label = "^", size = 8, color = "#172543") +  # Indicator for points above y limit
+    annotate("text", x = 0.3, y = log(30), label = "^", size = 8, color = "#172543") +  # Indicator for points above y limit
+    annotate("text", x = -0.3, y = log(30), label = "^", size = 8, color = "#172543") +  # Indicator for points above y limit
+    annotate("text", x = 0.6, y = log(30), label = "^", size = 8, color = "#172543") +  # Indicator for points above y limit
+    annotate("text", x = -0.6, y = log(30), label = "^", size = 8, color = "#172543") +  # Indicator for points above y limit
     # annotate("text", x = -0.2, y = 3.12, label = "^", vjust = -1.5, size = 8, color = "black") +
     # annotate("text", x = -0.08, y = 3.12, label = "^", vjust = -1.5, size = 8, color = "black") +
     # annotate("text", x = 0.08, y = 3.12, label = "^", vjust = -1.5, size = 8, color = "black") +
     # annotate("text", x = 0.2, y = 3.12, label = "^", vjust = -1.5, size = 8, color = "black") +
     # annotate("text", x = 0.35, y = 3.12, label = "^", vjust = -1.5, size = 8, color = "black") +
-    # annotate("segment", x = 0.35, xend = .35, y = 3.4, yend = 3.6,
+    # annotate("segment", x = 0.35, xend = .35, y = log(30), yend = 3.6,
     #          arrow = arrow(length = unit(0.2, "cm")), color = "black") +
-    scale_x_continuous(name="Estimate",limits=c(-0.6,0.6),
+    scale_x_continuous(name="Estimate", limits=c(-0.6,0.6),
                        breaks=c(-0.6, -0.4, -0.2, 0, .2,.4, 0.6)) +
     scale_y_continuous(name="log(Inclusion BF)", limits=c(-3.5,3.45),
                        breaks = c(log(1/10),log(1/3), log(1), log(3), log(10)),
@@ -52,6 +56,10 @@ edge_est_vs_post_incl_prob <- function(agg_point){
           panel.border = element_blank(),
           panel.background = element_blank(),
           axis.line  = element_line(colour = "black"))
+
+  # # might be a way to implement a scale break, but it doesn't work well with the current plot
+  # plot + ggbreak::scale_y_break(c(log(30), log(50)))
+
     # theme(legend.position=c(.17,.185),
     #       legend.text=element_text(size=16),
     #       legend.title=element_text(size=18),
