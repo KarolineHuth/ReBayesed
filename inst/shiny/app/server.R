@@ -9,6 +9,7 @@ library(magrittr)
 library(grid)
 library(gridExtra)
 library(ggplotify)
+library(gtools)
 
 # Define server logic
 server <- function(input, output, session) {
@@ -96,16 +97,24 @@ server <- function(input, output, session) {
       rownames_to_column() %>%
       rename("NetworkID" = "rowname")
 
+    # Get relevant metadata for each network
     metadata_df <- metadata %>%
       dplyr::filter(NetworkID %in% agg_data_df$NetworkID) %>%
       rename(Questionnaires = "Questionnaires used",
              DataLink = "Repository Link") %>%
       select(NetworkID, Questionnaires, DataLink)
 
+    # Merge the two dataframes
     merged_df <- merge(agg_data_df, metadata_df, by = "NetworkID", all.x = TRUE) %>%
       # mutate(Questionnaires = as.factor(Questionnaires)) %>%
       select(Reference, Year, DOI, Topic, Subtopic, Questionnaires, SampleType,
              Sample.size, Nodes, Edges, Model, DataLink, NetworkID)
+
+    # Sort by NetworkID
+    merged_df <- merged_df[merged_df$NetworkID %>% mixedorder(),]
+
+    # Redo rownames
+    rownames(merged_df) <- 1:nrow(merged_df)
 
     return(merged_df)
   })
