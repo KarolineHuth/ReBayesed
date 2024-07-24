@@ -33,6 +33,9 @@ edge_evidence_plot <- function(network_results, inclusion = TRUE){
                                        title = title,
                                        vsize = 8,
                                        edge.width = 4,
+                                       node.width = 1.1,
+                                       node.height = 1.1,
+                                       label.prop = 0.925,
                                        labels = colnames(network_results$BGGM_parameters)
   )
 
