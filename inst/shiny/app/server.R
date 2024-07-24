@@ -465,9 +465,11 @@ server <- function(input, output, session) {
     } else {
       # At least one plot present, take the first non-NULL plot and add legend
       plot_w_legend <- plots[[which(!sapply(plots, is.null))[1]]] +
+        labs(color = "Evidence Category") +
+        guides(color = guide_legend(override.aes = list(size = 10))) +
         theme(legend.position = "right",
-              legend.title = element_text(size = 14),
-              legend.text = element_text(size = 14))
+              legend.title = element_text(size = 25),
+              legend.text = element_text(size = 25))
 
       # Extract the legend
       g <- ggplotGrob(plot_w_legend)$grobs
