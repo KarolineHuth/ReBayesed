@@ -37,7 +37,7 @@ freq_vs_bayes_incl_bar <- function(agg_level){
   plot <- agg_level |>
     mutate(Category = factor(Category,
                              levels = c('included', 'weak included', 'inconclusive', 'weak excluded', 'excluded'))) |>
-    filter(Estimation %in% c("BGGM_2")) |> # changed to BGGM_2
+    filter(Estimation %in% c("BGGM_3")) |>
     ggplot(aes(x = Category, y = Value, group = Category,  color = Category))+
     geom_jitter(alpha = 0.3, size = 2.5) +
     coord_flip()+
@@ -47,7 +47,6 @@ freq_vs_bayes_incl_bar <- function(agg_level){
     # scale_fill_manual(values=c("#36648b", "#86a2b9" , "grey", "#d69999", "#990000"),
     #                   breaks=c('included', 'weak included', 'inconclusive', 'weak excluded', 'excluded'))+
     xlab("Category") + ylab("Percentage") +
-    # gg.theme("clean") +
     theme_bw(base_size = 16, base_family="Arial") +
     theme(legend.position = "none",
           axis.line.y = element_blank(),  # Remove the y-axis line
