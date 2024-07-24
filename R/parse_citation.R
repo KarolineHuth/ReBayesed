@@ -24,7 +24,7 @@ parse_citation <- function(citation){
   in_text_ref <- if(length(authors) > 2){
     paste(authors[1], "et al.", sep = " ")
   } else if (length(authors) == 2){
-    paste(authors, sep = " & ")
+    paste(authors, collapse = " & ")
   } else {
     authors
   }
