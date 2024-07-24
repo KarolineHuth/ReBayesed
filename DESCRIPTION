@@ -17,7 +17,10 @@ Imports:
   bslib,
   sortable,
   ggpubr,
-  latex2exp
+  latex2exp,
+  grid,
+  gridExtra,
+  ggplotify
 License: What license it uses
 RoxygenNote: 7.2.3
 Encoding: UTF-8
