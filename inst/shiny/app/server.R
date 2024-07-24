@@ -6,6 +6,9 @@ library(qgraph)
 library(ggdist)
 library(readxl)
 library(magrittr)
+library(grid)
+library(gridExtra)
+library(ggplotify)
 
 # Define server logic
 server <- function(input, output, session) {
@@ -39,6 +42,7 @@ server <- function(input, output, session) {
     }
   ", functions = c("copyToClipboard"))
 
+  ##### ABOUT PAGE END ######
 
   # Load data
   agg_data_list <- readRDS(system.file("extdata/AggStudyResults.rds",
@@ -127,7 +131,10 @@ server <- function(input, output, session) {
     "$(document).on('click', '[id^=plotBtn]', function(){",
     "  var id = this.getAttribute('id');",
     "  var i = parseInt(id.replace('plotBtn', ''));",
-    "  Shiny.setInputValue('plot_button_click', i);",
+    "  Shiny.setInputValue('plot_button_click', i, {priority: 'event'});",
+    "  setTimeout(function() {",
+    "    Shiny.setInputValue('plot_button_click', null);",
+    "  }, 1);",
     "});",
     "$(document).on('shiny:inputchanged', function(event) {",
     "  if (event.name === 'select_all') {",
@@ -152,42 +159,36 @@ server <- function(input, output, session) {
               colnames = c("", "Select", "Authors", "Year", "DOI", "Topic", "Subtopic",
                            "Questionnaires", "Sample Type", "Sample Size", "Nodes",
                            "Edges", "Model", "Data Link", "Network ID"),
+              # rownames = FALSE, # removing rownames like this doesn't work, need to use custom CSS
               selection = 'none',
               callback = JS(js_combined),
               escape = c(-2, -3, -5, -14), # Allows HTML in cells
               filter = 'top',
               options = list(
-                autoWidth = TRUE, # THIS FUCKS UP THE BUTTON WIDTH -> MAKE FALSE, THEN MANUALLY SET WIDTHS FOR COLS
+                autoWidth = FALSE, # THIS FUCKS UP THE BUTTON WIDTH -> MAKE FALSE, THEN MANUALLY SET WIDTHS FOR COLS
                 scrollX = TRUE,
                 pageLength = 100,
                 columnDefs = list(
-                  list(targets = 1, width = '4%'),
-                  list(targets = 2, width = '6%'),
-                  list(targets = 3, width = '10%'),
-                  list(targets = 4, width = '3%'),
-                  list(targets = 5, width = '22%',
+                  list(targets = c(2,4), width = '40px'),
+                  list(targets = c(1,10,11,12,13), width = '50px'),
+                  list(targets = c(6,9,15), width = '70px'),
+                  list(targets = c(3), width = '90px'),
+                  list(targets = c(7,8), width = '150px'),
+                  list(targets = 5, width = '200px',
                        render = JS( # Render DOI as a clickable hyperlink
                          "function(data, type, row, meta) {",
                          " return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
                          "}"
                       )
                     ),
-                  list(targets = 6, width = '9%'),
-                  list(targets = 7, width = '10%'),
-                  list(targets = 8, width = '18%'),
-                  list(targets = 9, width = '11%'),
-                  list(targets = 10, width = '18%'),
-                  list(targets = 11, width = '4%'),
-                  list(targets = 12, width = '2%'),
-                  list(targets = 13, width = '2%'),
-                  list(targets = 14, width = '10%',
+                  list(targets = 14, width = '30px',
                     # Render Data Link as a clickable hyperlink, exclude if NA
                     render = JS(
                       "function(data, type, row, meta) {",
                       " if (data === null) {",
                       "  return '';",
                       " } else {",
-                      "  return '<a href=\"' + data + '\" target=\"_blank\">' + data + '</a>';",
+                      "  return '<a href=\"' + data + '\" target=\"_blank\">Link</a>';",
                       " }",
                       "}"
                       )
@@ -319,28 +320,28 @@ server <- function(input, output, session) {
 
   ### INDIVIDUAL STUDIES END ###
 
-  ### METADATA START ###
-  metadata_r <- reactive({
-    # warning(input$rank_list_1)
-    # warning(input$rank_list_2)
-
-    return("AAA")
-  })
-
-  output$bucket_check <- renderPrint({
-    metadata_r()
-  })
-
-  # output$emergencyPlot <- renderPlot({
-  #   metadata_r |>
-  #     ggplot(aes(x = .)) +
-  #     geom_bar(fill = "#ffa500") +
-  #     gg.theme("clean") +
-  #     ylab("Count") +
-  #     theme(text=element_text(size=21))
+  # ### METADATA START ###
+  # metadata_r <- reactive({
+  #   # warning(input$rank_list_1)
+  #   # warning(input$rank_list_2)
+  #
+  #   return("AAA")
   # })
-
-  ### METADATA END ###
+  #
+  # output$bucket_check <- renderPrint({
+  #   metadata_r()
+  # })
+  #
+  # # output$emergencyPlot <- renderPlot({
+  # #   metadata_r |>
+  # #     ggplot(aes(x = .)) +
+  # #     geom_bar(fill = "#ffa500") +
+  # #     gg.theme("clean") +
+  # #     ylab("Count") +
+  # #     theme(text=element_text(size=21))
+  # # })
+  #
+  # ### METADATA END ###
 
   ### ESTIMATES START ###
 
@@ -433,7 +434,7 @@ server <- function(input, output, session) {
   })
 
   ## Render optional plots based on plot checkbox selection
-  # Generate plots based on checkbox selection and estimates_data_real
+  # Generate plots based on checkbox selection and estimates_data_real()
   plot_reactive <- reactive({
     fvb_incl_plot <- if ("fvb_incl" %in% input$estimatesPlotsCheckbox) {
       freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$NetworkID %in% estimates_data_real(),])
@@ -453,11 +454,33 @@ server <- function(input, output, session) {
       NULL
     }
 
-    list(
-      fvb_incl_plot = fvb_incl_plot,
-      edge_est_post_incl_plot = edge_est_post_incl_plot,
-      fvb_est_plot = fvb_est_plot
-    )
+    plots <- list(edge_est_post_incl_plot = edge_est_post_incl_plot,
+                  fvb_est_plot = fvb_est_plot,
+                  fvb_incl_plot = fvb_incl_plot)
+
+    # Create shared legend if at least one plot is present
+    if(all(sapply(plots, is.null))){
+      # No plots present
+      legend_shared <- NULL
+    } else {
+      # At least one plot present, take the first non-NULL plot and add legend
+      plot_w_legend <- plots[[which(!sapply(plots, is.null))[1]]] +
+        theme(legend.position = "right",
+              legend.title = element_text(size = 14),
+              legend.text = element_text(size = 14))
+
+      # Extract the legend
+      g <- ggplotGrob(plot_w_legend)$grobs
+      legend_shared <- g[[which(sapply(g, function(x) x$name) == "guide-box")]] %>%
+        ggplotify::as.ggplot()
+    }
+
+    plots <- list(edge_est_post_incl_plot = edge_est_post_incl_plot,
+                  fvb_est_plot = fvb_est_plot,
+                  fvb_incl_plot = fvb_incl_plot,
+                  legend_shared = legend_shared)
+
+    return(plots)
   })
 
   # Observe the reactive expression and render plots
@@ -467,6 +490,7 @@ server <- function(input, output, session) {
     output$freqVsBayesInclBar <- renderPlot({plots$fvb_incl_plot})
     output$edgeEstVsPostInclProb <- renderPlot({plots$edge_est_post_incl_plot})
     output$freqEstVsBayesEst <- renderPlot({plots$fvb_est_plot})
+    output$plotsLegend <- renderPlot({plots$legend_shared})
   })
 
 
