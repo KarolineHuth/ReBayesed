@@ -35,5 +35,8 @@ parse_citation <- function(citation){
   # Extract DOI
   doi <- str_match(citation, "(?i)\\bdoi[:\\s]*\\s*(10\\.\\S+)")[,2] #old regex: "(?i)\\bdoi.*(10\\.\\S+)"
 
+  if(is.na(doi)) # if doi not found, try URL type regex
+    doi <- str_match(citation, "https://doi\\.org/(10\\.\\S+)")[,2]
+
   return(list(in_text_ref = in_text_ref, year = year, doi = doi))
 }
