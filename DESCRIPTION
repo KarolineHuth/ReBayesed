@@ -15,7 +15,13 @@ Imports:
   qgraph,
   ggdist,
   bslib,
-  sortable
+  sortable,
+  ggpubr,
+  latex2exp,
+  grid,
+  gridExtra,
+  ggplotify,
+  gtools
 License: What license it uses
 RoxygenNote: 7.2.3
 Encoding: UTF-8

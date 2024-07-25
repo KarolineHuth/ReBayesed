@@ -22,8 +22,14 @@ ui <- navbarPage(
     "About",
     fluidPage(
       tags$head(
-        tags$style(HTML("table {table-layout: fixed;")),
-        tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"),
+        tags$style(HTML("table {table-layout: fixed;")), # I don't remember how this works, but keeps DTs nice, no delete
+        tags$style(type = "text/css", ".irs-grid-pol.small {height: 0px;}"), # Remove minor ticks from sliders
+        tags$style(HTML("
+        table.dataTable th:nth-child(1),
+        table.dataTable td:nth-child(1) {
+          display: none;
+        }
+        ")) # Remove rownames from DTs
       ),
       useShinyjs(),  # Initialize shinyjs
       titlePanel("RobustNetPsych: Bayesian Insights into Network Stability and Evidence"),
@@ -95,10 +101,10 @@ ui <- navbarPage(
                                     )
                ),
                checkboxInput("select_all",
-                             "Select/Deselect All"),
+                             "Select/Deselect Filtered"), # make "All" if all checkboxes above TRUE
                br(),
                downloadButton("downloadIndStudiesTable",
-                              "Download Filtered Network Results as RDS")
+                              "Download Selected Network Results as RDS")
              ),
              mainPanel(
                width = 9,
@@ -107,101 +113,101 @@ ui <- navbarPage(
              )
            )
   ),
-  tabPanel("Meta Data",
-           sidebarLayout(
-             sidebarPanel(
-               width = 4,
-               checkboxGroupInput("topicCheckboxMetadata",
-                                  "Topics",
-                                  choices = c("Clinical",
-                                              "Social",
-                                              "Personality",
-                                              "Work- and Organizational",
-                                              "Diagnostics",
-                                              "Public Health",
-                                              "Education",
-                                              "Other"),
-                                  selected = c("Clinical",
-                                               "Social",
-                                               "Personality",
-                                               "Work- and Organizational",
-                                               "Diagnostics",
-                                               "Public Health",
-                                               "Education",
-                                               "Other")
-               ),
-               conditionalPanel(
-                 # condition = "input.topicCheckbox.indexOf('Clinical') !== -1 |
-                 #              input.topicCheckbox.indexOf('Diagnostics') !== -1",
-                 condition = "TRUE",
-                 checkboxGroupInput("clinicalCheckboxMetadata",
-                                    "Sample Type for Clinical/Diagnostics Studies",
-                                    choices = c("General Population" = "Population",
-                                                "Clinical",
-                                                "Mixed"),
-                                    selected = "Population"
-                 )
-               ),
-               sliderInput("yearSliderMetadata",
-                           "Year of Publication",
-                           min = 2015,
-                           max = 2024,
-                           value = c(2015, 2024),
-                           step = 1
-               ),
-               sliderInput("nNodesSliderMetadata",
-                           "Number of Nodes",
-                           min = 3,
-                           max = 97,
-                           value = c(3, 97),
-                           step = 1
-               ),
-               sliderInput("sampleSizeMetadata",
-                           "Sample Size",
-                           min = 23,
-                           max = 388286,
-                           value = c(23, 388286),
-                           step = 1
-               ),
-               downloadButton("downloadTableMetadata",
-                              "Download Table as RDS"
-               )
-             ),
-             mainPanel(
-               width = 8,
-               fluidRow(
-                 column(
-                   width = 12,
-                   bucket_list(
-                     header = "Metadata variables",
-                     group_name = "bucket_list_group",
-                     orientation = "horizontal",
-                     add_rank_list(
-                       text = "Available variables",
-                       labels = list(
-                         "Year",
-                         "Nodes",
-                         "Edges",
-                         "Sample.size",
-                         "Topic"
-                       ),
-                       input_id = "rank_list_1"
-                     ),
-                     add_rank_list(
-                       text = "To plot",
-                       labels = NULL,
-                       input_id = "rank_list_2"
-                     )
-                   )
-                 )
-               ),
-               fluidRow(
-                 column(6, verbatimTextOutput("bucket_check")),
-               ),
-               br()
-             )
-           )
-  ),
+  # tabPanel("Meta Data",
+  #          sidebarLayout(
+  #            sidebarPanel(
+  #              width = 4,
+  #              checkboxGroupInput("topicCheckboxMetadata",
+  #                                 "Topics",
+  #                                 choices = c("Clinical",
+  #                                             "Social",
+  #                                             "Personality",
+  #                                             "Work- and Organizational",
+  #                                             "Diagnostics",
+  #                                             "Public Health",
+  #                                             "Education",
+  #                                             "Other"),
+  #                                 selected = c("Clinical",
+  #                                              "Social",
+  #                                              "Personality",
+  #                                              "Work- and Organizational",
+  #                                              "Diagnostics",
+  #                                              "Public Health",
+  #                                              "Education",
+  #                                              "Other")
+  #              ),
+  #              conditionalPanel(
+  #                # condition = "input.topicCheckbox.indexOf('Clinical') !== -1 |
+  #                #              input.topicCheckbox.indexOf('Diagnostics') !== -1",
+  #                condition = "TRUE",
+  #                checkboxGroupInput("clinicalCheckboxMetadata",
+  #                                   "Sample Type for Clinical/Diagnostics Studies",
+  #                                   choices = c("General Population" = "Population",
+  #                                               "Clinical",
+  #                                               "Mixed"),
+  #                                   selected = "Population"
+  #                )
+  #              ),
+  #              sliderInput("yearSliderMetadata",
+  #                          "Year of Publication",
+  #                          min = 2015,
+  #                          max = 2024,
+  #                          value = c(2015, 2024),
+  #                          step = 1
+  #              ),
+  #              sliderInput("nNodesSliderMetadata",
+  #                          "Number of Nodes",
+  #                          min = 3,
+  #                          max = 97,
+  #                          value = c(3, 97),
+  #                          step = 1
+  #              ),
+  #              sliderInput("sampleSizeMetadata",
+  #                          "Sample Size",
+  #                          min = 23,
+  #                          max = 388286,
+  #                          value = c(23, 388286),
+  #                          step = 1
+  #              ),
+  #              downloadButton("downloadTableMetadata",
+  #                             "Download Table as RDS"
+  #              )
+  #            ),
+  #            mainPanel(
+  #              width = 8,
+  #              fluidRow(
+  #                column(
+  #                  width = 12,
+  #                  bucket_list(
+  #                    header = "Metadata variables",
+  #                    group_name = "bucket_list_group",
+  #                    orientation = "horizontal",
+  #                    add_rank_list(
+  #                      text = "Available variables",
+  #                      labels = list(
+  #                        "Year",
+  #                        "Nodes",
+  #                        "Edges",
+  #                        "Sample.size",
+  #                        "Topic"
+  #                      ),
+  #                      input_id = "rank_list_1"
+  #                    ),
+  #                    add_rank_list(
+  #                      text = "To plot",
+  #                      labels = NULL,
+  #                      input_id = "rank_list_2"
+  #                    )
+  #                  )
+  #                )
+  #              ),
+  #              fluidRow(
+  #                column(6, verbatimTextOutput("bucket_check")),
+  #              ),
+  #              br()
+  #            )
+  #          )
+  # ),
   tabPanel("Estimates",
            sidebarLayout(
              sidebarPanel(
@@ -255,7 +261,8 @@ ui <- navbarPage(
                            min = 2015,
                            max = 2024,
                            value = c(2015, 2024),
-                           step = 1
+                           step = 1,
+                           sep = ""
                ),
                sliderInput("nNodesSliderEstimates",
                            "Number of Nodes",
@@ -267,12 +274,12 @@ ui <- navbarPage(
                sliderInput("sampleSizeEstimates",
                            "Sample Size",
                            min = 23,
-                           max = 10000,
-                           value = c(23, 10000),
+                           max = 5000,
+                           value = c(23, 5000),
                            step = 1
                ),
                checkboxInput("sampleSizeOutliersEstimates",
-                             "Include Sample Size Outliers (n > 10k)"),
+                             "Include Sample Size Outliers (n > 5k)"),
                downloadButton("downloadTableEstimates",
                               "Download Table as RDS"
                )
@@ -289,6 +296,7 @@ ui <- navbarPage(
                ),
                fluidRow(
                  column(6, plotOutput("freqEstVsBayesEst")),
+                 column(6, plotOutput("plotsLegend"))
                )
              )
            )
