@@ -186,7 +186,11 @@ server <- function(input, output, session) {
                   list(targets = 5, width = '200px',
                        render = JS( # Render DOI as a clickable hyperlink
                          "function(data, type, row, meta) {",
-                         " return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
+                         " if (data === null) {",
+                         "  return '';",
+                         " } else {",
+                         "  return '<a href=\"https://doi.org/' + data + '\" target=\"_blank\">' + data + '</a>';",
+                         " }",
                          "}"
                       )
                     ),

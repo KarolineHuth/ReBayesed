@@ -33,7 +33,7 @@ parse_citation <- function(citation){
   year <- str_match(citation, "\\((\\d{4})\\)")[,2]
 
   # Extract DOI
-  doi <- str_match(citation, "(?i)\\bdoi.*(10\\.\\S+)")[,2]
+  doi <- str_match(citation, "(?i)\\bdoi[:\\s]*\\s*(10\\.\\S+)")[,2] #old regex: "(?i)\\bdoi.*(10\\.\\S+)"
 
   return(list(in_text_ref = in_text_ref, year = year, doi = doi))
 }
