@@ -310,7 +310,7 @@ server <- function(input, output, session) {
   # Download Handler for Table Data
   output$downloadIndStudiesTable <- downloadHandler(
     filename = function() {
-      paste("filtered-network-data-", Sys.Date(), ".Rdata", sep="")
+      paste("filtered-network-data-", Sys.Date(), ".rds", sep="")
     },
     content = function(file) {
       saveRDS(agg_data_list[names(agg_data_list) %in% checked_network_ids()],

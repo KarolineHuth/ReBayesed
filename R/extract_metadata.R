@@ -19,7 +19,7 @@ extract_metadata <- function(entry) {
   # Extract the metadata
   entry_metadata_df <- data.frame(
     Reference = parsed_citation$in_text_ref,
-    Year = as.numeric(parsed_citation$year),
+    Year = round(as.numeric(parsed_citation$year), digits = 0),
     DOI = parsed_citation$doi,
     Nodes = entry$p,
     Edges = entry$n,
