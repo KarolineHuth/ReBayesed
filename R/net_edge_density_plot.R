@@ -35,13 +35,14 @@ net_edge_density_plot <- function(agg_point){
   plot <- agg_point %>%
     ggplot(aes(x=BGGM_estimate)) +
     ggdist::stat_halfeye(.width = 0.95, point_interval = median_hdci,
-                         color = "black") +
+                         color = "#06757a", fill = "#06757a", alpha = .3) +
     # geom_vline(xintercept = median_density, linetype="dashed", color="red") +
     # geom_point(aes(x = density, y = -0.05), size = 2, color = "black", shape = 1) +
     geom_jitter(aes(x = BGGM_estimate, y = -0.05),
-                width = 0, height = 0.025, color = "black", shape = 1, alpha = 0.1, size = 0.025) +
+                width = 0, height = 0.025, color = "#06757a", shape = 1, alpha = 0.1, size = 0.025) +
     scale_x_continuous(limits=c(-0.7, 0.7),
                        breaks=c(-0.6, -0.4, -0.2, 0, .2,.4,0.6)) +
+    # scale_colour_manual( values = c("#06757a"), alpha = .3) +
     # gg.theme("clean") +
     # annotate("text", x = hdi$y, y = 0.12,
     #          label = paste0("Median: ", str_sub(round(hdi$y, 3), 2)), color = "black", vjust = -0.5) +

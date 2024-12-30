@@ -436,7 +436,7 @@ server <- function(input, output, session) {
     return(estimates_df)
   })
 
-  # Render freqVsBayesInclBar
+  # Render netDensity
   output$netDensityDensity <- renderPlot({
     net_density_density_plot(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
   })
@@ -450,7 +450,7 @@ server <- function(input, output, session) {
   # Generate plots based on checkbox selection and estimates_data_real()
   plot_reactive <- reactive({
     fvb_incl_plot <- if ("fvb_incl" %in% input$estimatesPlotsCheckbox) {
-      freq_vs_bayes_incl_bar(agg_data_level[agg_data_level$NetworkID %in% estimates_data_real(),])
+      freq_vs_bayes_incl_bar(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
     } else {
       NULL
     }
@@ -490,9 +490,9 @@ server <- function(input, output, session) {
         ggplotify::as.ggplot()
     }
 
-    plots <- list(edge_est_post_incl_plot = edge_est_post_incl_plot,
-                  fvb_est_plot = fvb_est_plot,
+    plots <- list( fvb_est_plot = fvb_est_plot,
                   fvb_incl_plot = fvb_incl_plot,
+                  edge_est_post_incl_plot = edge_est_post_incl_plot,
                   legend_shared = legend_shared)
 
     return(plots)

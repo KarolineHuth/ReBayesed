@@ -35,21 +35,23 @@ net_density_density_plot <- function(agg_point){
   set.seed(1) # for consistent jitter
   plot <- density_data %>%
     ggplot(aes(x=density)) +
+    # geom_density(fill = "#06757a", color = "#06757a", alpha = .5) +
     ggdist::stat_halfeye(.width = 0.95, point_interval = median_hdci,
-                         color = "black") +
+                         color = "#06757a", fill = "#06757a", alpha = .3) +
     # geom_vline(xintercept = median_density, linetype="dashed", color="red") +
     # geom_point(aes(x = density, y = -0.05), size = 2, color = "black", shape = 1) +
     geom_jitter(aes(x = density, y = -0.05),
-                width = 0, height = 0.025, color = "black", shape = 1, alpha = 0.5) +
+                width = 0, height = 0.025, color = "#06757a", shape = 1, alpha = 0.5) +
     scale_x_continuous(limits=c(0, 1),
                        breaks=c(0, .2, .4, .6, .8, 1)) +
+    # scale_colour_manual( values = c("#06757a"), alpha = .3) +
     # annotate("text", x = hdi$y, y = 0.02,
     #          label = paste0("Median: ", str_sub(round(hdi$y, 3), 2)), color = "black", vjust = -0.5) +
     # annotate("text", x = hdi$ymin, y = 0.02,
     #          label = hdi_min_text, color = "black", vjust = -0.5) +
     # annotate("text", x = hdi$ymax, y = 0.02,
     #          label = hdi_max_text, color = "black", vjust = -0.5) +
-    labs(x = "Network Density") +
+    labs(x = "Network Density (Percentage of Present Edges)") +
     theme_bw(base_size = 16, base_family="Arial") +
     theme(axis.text.x     = element_text(size = 14),
           axis.title.y    = element_blank(),

@@ -9,16 +9,19 @@
 #' @export
 
 freq_vs_bayes_est_plot <- function(agg_point){
+  agg_point$BGGM3_color[agg_point$BGGM3_color == "#990000"] <- "#eeb004"
+  agg_point$BGGM3_color[agg_point$BGGM3_color == "#d69999"] <- "#f9d183"
+
   plot <- ggplot(agg_point, aes(x = modSelect_estimate, y = BGGM3_estimate, color = BGGM3_color)) +
     geom_vline(xintercept = 0, linewidth = 0.5, linetype = 3, alpha = 0.25)+
     geom_hline(yintercept = 0, linewidth = 0.5, linetype = 3, alpha = 0.25)+
-    geom_point(shape = 20, size = 2) +
+    geom_point(shape = 20, size = 2, alpha = .3) +
     # geom_abline(linewidth = 2, linetype = "longdash")+
     scale_x_continuous(name="Frequentist Estimate",limits=c(-0.7, 0.7),
                        breaks=c(-0.6, -0.4, -0.2, 0, .2,.4,0.6)) +
     scale_y_continuous(name="Bayesian Estimate",limits=c(-0.7, 0.7),
                        breaks=c(-0.6, -0.4, -0.2, 0, .2,.4,0.6)) +
-    scale_color_identity(breaks = c("#36648b", "#86a2b9" , "grey", "#d69999", "#990000"),
+    scale_color_identity(breaks = c("#36648b", "#86a2b9" , "grey", "#f9d183", "#eeb004"),
                          labels = c('Included', 'Weak Included', 'Inconclusive', 'Weak Excluded', 'Excluded'),
                          guide = "legend") +
     ggtitle("") + xlab("") + ylab("") +

@@ -24,14 +24,19 @@ edge_evidence_plot <- function(network_results, inclusion = TRUE){
     graph[network_results$BGGM_inc_probs >= 0.5] <- 0
     title <- "Edge Exclusion Evidence Plot"
   }
+  # we changed the colors after fitting to yellow instead of red to avoid confusion
+  evidence_color <- network_results$BGGM_color
+  evidence_color[evidence_color== "#990000"] <- "#eeb004"
+  evidence_color[evidence_color== "#d69999"] <- "#f9d183"
 
   # Create the evidence plot
   edge_evidence_plot <- qgraph::qgraph(graph,
-                                       edge.color = network_results$BGGM_color,
+                                       edge.color = evidence_color,
                                        layout = net_layout,
                                        theme = "TeamFortress",
                                        title = title,
                                        vsize = 8,
+                                       title.cex = 1.6,
                                        edge.width = 4,
                                        node.width = 1.1,
                                        node.height = 1.1,

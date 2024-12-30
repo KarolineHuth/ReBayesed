@@ -20,11 +20,11 @@ network_par_plot <- function(network_results){
                              theme = "TeamFortress",
                              title = "Parameter Plot",
                              vsize = 8,
+                             title.cex = 1.6,
                              edge.width = 1,
                              node.width = 1.1,
                              node.height = 1.1,
                              label.prop = 0.925,
-                             # edge.color = network_results$BGGM_color,
                              legend = FALSE,
                              labels = colnames(network_results$BGGM_parameters)
   )
