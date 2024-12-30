@@ -1,9 +1,9 @@
-Package: NRP.web
+Package: ReBayesed
 Type: Package
 Title: What the Package Does
 Version: 0.1.0
-Author: Konrad Mikalauskas
-Maintainer: Konrad Mikalauskas <k.mikalauskas@uva.nl>
+Author: Karoline Huth
+Maintainer: Karoline Huth <k.huth@uva.nl>
 Description: A brief description
 Imports:
   shiny,
