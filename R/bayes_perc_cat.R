@@ -2,12 +2,13 @@
 #'
 #' @description This function creates a bar chart that shows the percentage of edges falling into respective edge categories.
 #'
-#' @param agg_point A data frame with the edge specicific information.
+#' @param agg_point A data frame with the edge specific information.
 #'
 #' @return A bar chart that shows the percentage of edges in the respective categories.
+#'
 #' @export
 
-freq_vs_bayes_incl_bar <- function(agg_point){
+bayes_perc_cat <- function(agg_point){
 
 
   set.seed(1) # for consistent jittering

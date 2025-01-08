@@ -6,7 +6,9 @@
 #' @param inclusion A logical value indicating whether to plot the edge inclusion evidence (if FALSE, then evidence for exclusion is plotted).
 #'
 #' @return A network plot of the parameters from the BGGM results.
+#'
 #' @export
+#'
 edge_evidence_plot <- function(network_results, inclusion = TRUE){
 
   # Create layout for the network plots

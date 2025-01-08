@@ -462,7 +462,7 @@ server <- function(input, output, session) {
   # Generate plots based on checkbox selection and estimates_data_real()
   plot_reactive <- reactive({
     fvb_incl_plot <- if ("fvb_incl" %in% input$estimatesPlotsCheckbox) {
-      freq_vs_bayes_incl_bar(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
+      bayes_perc_cat(agg_data_point[agg_data_point$NetworkID %in% estimates_data_real(),])
     } else {
       NULL
     }
