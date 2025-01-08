@@ -1,4 +1,4 @@
-library(NRP.web)
+# library(ReBayesed)
 library(shiny)
 library(DT)
 library(tidyverse)
@@ -14,6 +14,30 @@ library(gtools)
 # Define server logic
 server <- function(input, output, session) {
 
+  #### LOAD Data
+  # agg_data_point <- data_point
+  # agg_data_level <- data_level
+  # agg_data_list <- data_list
+  # metadata <- mdata
+  # Load data
+  agg_data_list <- readRDS("AggStudyResults.rds")
+  agg_data_level <- readRDS("IndividualStudyData.rds")
+  agg_data_point <- readRDS("EdgeSpecificEstimates.rds")
+  suppressMessages({
+    metadata <- read_excel("metadata.xlsx")
+  })
+
+  #
+  # agg_data_level <- readRDS(system.file("extdata", "IndividualStudyData.rds",
+  #                                       package = "ReBayesed"))
+  # agg_data_point <- readRDS(system.file("extdata", "EdgeSpecificEstimates.rds",
+  #                                       package = "ReBayesed"))
+  # #
+  # # # Load metadata
+  # suppressMessages({
+  #   metadata <- read_excel(system.file("extdata", "metadata.xlsx",
+  #                                      package = "ReBayesed"))
+  # })
 
   ##### ABOUT PAGE ######
   # Create contact link
@@ -43,15 +67,7 @@ server <- function(input, output, session) {
     }
   ", functions = c("copyToClipboard"))
 
-  ##### ABOUT PAGE END ######
 
-  # Load data
-  agg_data_list <- readRDS(system.file("extdata/AggStudyResults.rds",
-                                       package = "NRP.web"))
-  agg_data_level <- readRDS(system.file("extdata/IndividualStudyData.rds",
-                                        package = "NRP.web"))
-  agg_data_point <- readRDS(system.file("extdata/EdgeSpecificEstimates.rds",
-                                        package = "NRP.web"))
 
   ## Fix NaN/Inf in inclusion prob / BF issue:
   # Get the number of columns to check/fix
@@ -73,11 +89,7 @@ server <- function(input, output, session) {
     agg_data_point[grepl("inc_prob", names(agg_data_point))] <- fix_cols
   }
 
-  # Load metadata
-  suppressMessages({
-    metadata <- read_excel(system.file("extdata/metadata.xlsx",
-                                       package = "NRP.web"))
-  })
+
   # first row is the column names
   colnames(metadata) <- as.character(metadata[1,])
   metadata <- metadata[-1,]
@@ -321,7 +333,7 @@ server <- function(input, output, session) {
   # Download Handler for Network Data
   output$downloadNetworkData <- downloadHandler(
     filename = function() {
-      name = paste(table_data()[input$plot_button_click, "NetworkID"], ".Rdata", sep="")
+      name = paste(table_data()[input$plot_button_click, "NetworkID"], ".rds", sep="")
       return(name)
     },
     content = function(file) {

@@ -3,7 +3,8 @@ library(shinyjs)
 library(DT)
 library(bslib)
 library(sortable)
-library(shinyjs)
+# devtools::install_github("KarolineHuth/ReBayesed", upgrade_dependencies=FALSE)
+# library("ReBayesed")
 
 ui <- fluidPage(
   tags$head(tags$style(HTML("
@@ -73,8 +74,7 @@ ui <- navbarPage(
       ),
       br(),  # Add a line break to create space
       h2("Want to contribute a network of yours?"),
-      p("ReBayesed is aimed at being a living resource with networks being added on a regular basis.
-        To contribute your own network, please do not hesitate to reach out to us using the contact email below."),
+      p("To contribute your own network, please do not hesitate to reach out to us using the contact email below."),
       br(),  # Add a line break to create space
       h2("Citation"),
       p("Please cite the application and the materials obtained from it accordingly. Furthermore, in case specific datasets are being used,

@@ -23,6 +23,8 @@ Imports:
   ggplotify,
   gtools
 License: What license it uses
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
-
+Depends: 
+    R (>= 2.10)
+LazyData: TRUE

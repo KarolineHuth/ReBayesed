@@ -2,16 +2,16 @@
 % Please edit documentation in R/freq_vs_bayes_incl_bar.R
 \name{freq_vs_bayes_incl_bar}
 \alias{freq_vs_bayes_incl_bar}
-\title{Frequentist Vs. Bayesian Edge Inclusion Bar Chart}
+\title{Percentage of edges in the respective evidence categories}
 \usage{
-freq_vs_bayes_incl_bar(agg_level)
+freq_vs_bayes_incl_bar(agg_point)
 }
 \arguments{
-\item{agg_level}{A data frame with the aggregated evidence for inclusion for each edge.}
+\item{agg_point}{A data frame with the edge specicific information.}
 }
 \value{
-A bar chart that compares the Bayesian and Frequentist edge inclusions.
+A bar chart that shows the percentage of edges in the respective categories.
 }
 \description{
-This function creates a bar chart that compares the Bayesian and Frequentist edge inclusions,
+This function creates a bar chart that shows the percentage of edges falling into respective edge categories.
 }

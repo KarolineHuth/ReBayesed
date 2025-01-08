@@ -5,7 +5,7 @@ account: networkreanalysis
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13650565
-bundleId:
+bundleId: 9589092
 url: https://networkreanalysis.shinyapps.io/ReBayesed/
 version: 1
 asMultiple: FALSE
