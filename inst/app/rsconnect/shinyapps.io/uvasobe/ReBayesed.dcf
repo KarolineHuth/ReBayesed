@@ -5,7 +5,7 @@ account: uvasobe
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13680148
-bundleId: 9620933
+bundleId: 9646863
 url: https://uvasobe.shinyapps.io/ReBayesed/
 version: 1
 asMultiple: FALSE

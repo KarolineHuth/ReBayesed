@@ -1,4 +1,4 @@
-# library(ReBayesed)
+
 library(shiny)
 library(DT)
 library(tidyverse)
@@ -10,6 +10,7 @@ library(grid)
 library(gridExtra)
 library(ggplotify)
 library(gtools)
+
 
 # Define server logic
 server <- function(input, output, session) {
@@ -51,21 +52,39 @@ server <- function(input, output, session) {
   })
   # Custom JavaScript for copying text to clipboard
   observeEvent(input$copyCitation, {
-    citationText <- "Huth, K., Pihlajamäki, M., Marsman, M., & Haslbeck, J. M. B. (2024, June 13). Bayesian Re-Analysis. Retrieved from osf.io/n8r9g"
+    citationText <- c("Huth, K., Haslbeck, J. M. B., Keetelaar, S., van Holst, R.J., & Marsman, M.(2024). Statistical Evidence in Psychological Networks: A Bayesian Analysis of 294 Networks from 126 Studies. Retrieved from osf.io/n8r9g.")
     js$copyToClipboard(citationText)
     showNotification("Citation copied to clipboard!")
   })
 
-  shinyjs::extendShinyjs(text = "
+  shinyjs::extendShinyjs(
+    text = "
     shinyjs.copyToClipboard = function(params) {
+      // Ensure params is a string
+      var textToCopy = params || '';
+
+      // Create a temporary textarea element
       var copyText = document.createElement('textarea');
-      copyText.value = params;
-      document.body.appendChild(copyText);
-      copyText.select();
-      document.execCommand('copy');
+      copyText.value = textToCopy; // Set the value to the text to copy
+      document.body.appendChild(copyText); // Append it to the body
+      copyText.select(); // Select the text
+
+      // Try copying to clipboard
+      try {
+        var successful = document.execCommand('copy');
+        if (!successful) {
+          console.error('Failed to copy text to clipboard');
+        }
+      } catch (err) {
+        console.error('Error copying text: ', err);
+      }
+
+      // Remove the textarea element from the DOM
       document.body.removeChild(copyText);
     }
-  ", functions = c("copyToClipboard"))
+  ",
+    functions = c("copyToClipboard")
+  )
 
 
 
@@ -533,4 +552,7 @@ server <- function(input, output, session) {
 
 
   ### ESTIMATES END ###
+  ### DOCUMENTATION START ###
+
+    ### DOCUMENTATION END ###
 }

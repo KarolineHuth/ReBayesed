@@ -22,6 +22,7 @@ Imports:
   gridExtra,
   ggplotify,
   gtools
+Remotes: KarolineHuth/ReBayesed
 License: What license it uses
 RoxygenNote: 7.3.2
 Encoding: UTF-8

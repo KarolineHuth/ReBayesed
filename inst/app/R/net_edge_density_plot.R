@@ -50,7 +50,7 @@ net_edge_density_plot <- function(agg_point){
     #          label = hdi_min_text, color = "black", vjust = -0.5) +
     # annotate("text", x = hdi$ymax, y = 0.02,
     #          label = hdi_max_text, color = "black", vjust = -0.5) +
-    labs(x = "Partial Association") +
+    labs(x = "Edge Density") +
     theme_bw(base_size = 16, base_family="Arial") +
     theme(axis.text.x     = element_text(size = 14),
           axis.title.y    = element_blank(),
